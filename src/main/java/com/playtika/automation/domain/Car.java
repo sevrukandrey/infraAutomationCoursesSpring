@@ -1,14 +1,27 @@
 package com.playtika.automation.domain;
 
+import lombok.Builder;
 import lombok.Data;
 
-@Data
-public class Car {
-    private String id;
-    private String brand;
-    private int year;
-    private String color;
-    private int price;
-    private boolean sold;
 
+public class Car {
+    public long id;
+    public String brand;
+    public int year;
+    public String color;
+    public int price;
+    public boolean sold;
+
+    public Car(){
+
+    }
+
+    public Car(long id, String brand, int year, String color, int price, boolean sold) {
+        this.id = id;
+        this.brand = brand;
+        this.year = year;
+        this.color = color;
+        this.price = price;
+        this.sold = sold;
+    }
 }

@@ -7,21 +7,7 @@ import lombok.Data;
 public class Car {
     public long id;
     public String brand;
+    public String ownerContacts;
+    public double price;
 
-    public Car(){
-
-    }
-
-    public Car(long id, String brand) {
-        this.id = id;
-        this.brand = brand;
-    }
-
-    @Override
-    public String toString() {
-        return "Car{" +
-                "id=" + id +
-                ", brand='" + brand + '\'' +
-                '}';
-    }
 }

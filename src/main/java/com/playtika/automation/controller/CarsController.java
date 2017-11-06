@@ -2,17 +2,13 @@ package com.playtika.automation.controller;
 
 import com.playtika.automation.domain.Car;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.Timestamp;
+import java.util.*;
 
 import static org.springframework.http.MediaType.*;
 
@@ -21,13 +17,26 @@ import static org.springframework.http.MediaType.*;
 public class CarsController {
     //List<Car> cars = new ArrayList<>();
 
-    Map<Long, Car> cars = new HashMap<>();
+    private static final Logger LOG = LoggerFactory.getLogger(CarsController.class);
+
+    private Map<Long, Car> cars = new HashMap<>();
 
     @PostMapping(value = "/addCar")
     @ResponseBody
-    public long addCar(@RequestBody Car car) {
-        cars.put(car.id, car);
-        return car.id;
+    public long addCar(@RequestBody Car car,
+                       @RequestParam("price") double price,
+                       @RequestParam("ownerContacts") String ownerContacts) {
+
+        long carId = new Timestamp(System.currentTimeMillis()).getTime();
+        car.price = price;
+        car.ownerContacts = ownerContacts;
+        car.id = carId;
+
+        cars.put(carId, car);
+
+        LOG.info("addCar was finished [carId: {}; carInfo: {}]", carId, car);
+
+        return carId;
     }
 
     @GetMapping(value = "/getAllCars")
@@ -44,7 +53,7 @@ public class CarsController {
 
     @GetMapping(value = "/getCarInfo")
     @ResponseBody
-    public Car getCarDetails(@RequestParam("id") long id) {
-        return cars.get(id);
+    public String getCarDetails(@RequestParam("id") long id) {
+        return cars.get(id).ownerContacts + " " + cars.get(id).price;
     }
 }

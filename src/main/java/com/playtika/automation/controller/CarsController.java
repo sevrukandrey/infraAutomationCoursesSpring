@@ -2,6 +2,7 @@ package com.playtika.automation.controller;
 
 import com.playtika.automation.domain.Car;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -9,15 +10,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.springframework.http.MediaType.*;
 
 @Controller
+@Slf4j
 @RequestMapping(produces = APPLICATION_JSON_UTF8_VALUE)
 public class CarsController {
-    //List<Car> cars = new ArrayList<>();
-
-    private static final Logger LOG = LoggerFactory.getLogger(CarsController.class);
 
     private Map<Long, Car> cars = new HashMap<>();
 
@@ -28,13 +28,14 @@ public class CarsController {
                        @RequestParam("ownerContacts") String ownerContacts) {
 
         long carId = new Timestamp(System.currentTimeMillis()).getTime();
-        car.price = price;
-        car.ownerContacts = ownerContacts;
-        car.id = carId;
+
+        car.setPrice(price);
+        car.setOwnerContacts(ownerContacts);
+        car.setId(carId);
 
         cars.put(carId, car);
 
-        LOG.info("addCar was finished [carId: {}; carInfo: {}]", carId, car);
+        log.info("addCar was finished [carId: {}; carInfo: {}]", carId, car);
 
         return carId;
     }
@@ -54,6 +55,6 @@ public class CarsController {
     @GetMapping(value = "/getCarInfo")
     @ResponseBody
     public String getCarDetails(@RequestParam("id") long id) {
-        return cars.get(id).ownerContacts + " " + cars.get(id).price;
+        return cars.get(id).getOwnerContacts() + " " + cars.get(id).getPrice();
     }
 }

@@ -1,13 +1,16 @@
 package com.playtika.automation.domain;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-
+@Getter
+@Setter
+@ToString
 public class Car {
-    public long id;
-    public String brand;
-    public String ownerContacts;
-    public double price;
 
+    private long id;
+    private String brand;
+    private String ownerContacts;
+    private double price;
 }

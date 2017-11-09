@@ -8,8 +8,6 @@ import lombok.ToString;
 @Data
 public class Car {
 
-    private long id;
     private String brand;
-    private String ownerContacts;
-    private double price;
+    private String model;
 }

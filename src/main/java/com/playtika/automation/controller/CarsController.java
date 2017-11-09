@@ -1,5 +1,6 @@
 package com.playtika.automation.controller;
 
+import com.playtika.automation.controller.dto.CarForSale;
 import com.playtika.automation.domain.Car;
 
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.springframework.http.MediaType.*;
 
@@ -18,6 +21,8 @@ import static org.springframework.http.MediaType.*;
 @Slf4j
 @RequestMapping(produces = APPLICATION_JSON_UTF8_VALUE)
 public class CarsController {
+    private AtomicLong generateId = new AtomicLong();
+    private Map<Long, CarForSale> cars = new ConcurrentHashMap<>();
 
     @ResponseStatus(value= HttpStatus.NOT_FOUND, reason="No such Id")
     public class ResourceNotFoundException extends RuntimeException {
@@ -26,28 +31,32 @@ public class CarsController {
             }
     }
 
-    private Map<Long, Car> cars = new HashMap<>();
+
 
     @PostMapping(value = "/car")
-    public long addCar(@RequestBody Car car,
-                       @RequestParam("price") double price,
-                       @RequestParam("ownerContacts") String ownerContacts) {
+    public CarForSale addCar(@RequestBody Car car,
+                       @PathVariable("price") double price,
+                       @PathVariable("ownerContacts") String ownerContacts) {
 
-        long carId = new Timestamp(System.currentTimeMillis()).getTime();
+        long carId = generateId.getAndIncrement();
+        CarForSale carForSale = new CarForSale();
 
-        car.setPrice(price);
-        car.setOwnerContacts(ownerContacts);
-        car.setId(carId);
+        carForSale.setId(carId);
+        carForSale.setBrand(car.getBrand());
+        carForSale.setModel(car.getModel());
+        carForSale.setOwnerContacts(ownerContacts);
+        carForSale.setPrice(price);
 
-        cars.put(carId, car);
+
+        cars.put(carId, carForSale);
 
         log.info("addCar was finished [carId: {}; carInfo: {}]", carId, car);
 
-        return carId;
+        return carForSale;
     }
 
     @GetMapping(value = "/cars")
-    public Map<Long, Car> getAllCars() {
+    public Map<Long, CarForSale> getAllCars() {
         return cars;
     }
 

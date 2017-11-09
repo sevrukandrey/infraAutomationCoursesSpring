@@ -5,6 +5,7 @@ import com.playtika.automation.domain.Car;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,15 +14,21 @@ import java.util.*;
 
 import static org.springframework.http.MediaType.*;
 
-@Controller
+@RestController
 @Slf4j
 @RequestMapping(produces = APPLICATION_JSON_UTF8_VALUE)
 public class CarsController {
 
+    @ResponseStatus(value= HttpStatus.NOT_FOUND, reason="No such Id")
+    public class ResourceNotFoundException extends RuntimeException {
+            public  ResourceNotFoundException(String message){
+                super(message);
+            }
+    }
+
     private Map<Long, Car> cars = new HashMap<>();
 
-    @PostMapping(value = "/addCar")
-    @ResponseBody
+    @PostMapping(value = "/car")
     public long addCar(@RequestBody Car car,
                        @RequestParam("price") double price,
                        @RequestParam("ownerContacts") String ownerContacts) {
@@ -39,21 +46,21 @@ public class CarsController {
         return carId;
     }
 
-    @GetMapping(value = "/getAllCars")
-    @ResponseBody
+    @GetMapping(value = "/cars")
     public Map<Long, Car> getAllCars() {
         return cars;
     }
 
-    @DeleteMapping(value = "/deleteCar")
-    @ResponseBody
+    @DeleteMapping(value = "/car")
     public void deleteCar(@RequestParam("id") long id) {
         cars.remove(id);
     }
 
-    @GetMapping(value = "/getCarInfo")
-    @ResponseBody
-    public String getCarDetails(@RequestParam("id") long id) {
+    @GetMapping(value = "/carInfo/{id}")
+    public String getCarDetails(@PathVariable("id") long id) {
+        if (cars.get(id) == null) {
+          throw new ResourceNotFoundException("Car with id" + id + " not found");
+        }
         return cars.get(id).getOwnerContacts() + " " + cars.get(id).getPrice();
     }
 }

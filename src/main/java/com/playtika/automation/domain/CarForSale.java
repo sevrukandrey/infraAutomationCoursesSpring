@@ -1,11 +1,12 @@
 package com.playtika.automation.domain;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
 public class CarForSale {
 
-    private long Id;
+    private long id;
     private String model;
     private String brand;
     private String ownerContacts;

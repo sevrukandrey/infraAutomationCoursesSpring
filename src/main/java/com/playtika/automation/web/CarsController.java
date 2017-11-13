@@ -1,4 +1,4 @@
-package com.playtika.automation.controller;
+package com.playtika.automation.web;
 
 import com.playtika.automation.domain.Car;
 import com.playtika.automation.domain.CarForSale;
@@ -17,9 +17,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 @Slf4j
 @RequestMapping(produces = APPLICATION_JSON_UTF8_VALUE)
 public class CarsController {
-
-
-
     private final CarService carService;
 
     @Autowired

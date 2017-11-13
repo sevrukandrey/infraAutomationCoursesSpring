@@ -1,6 +1,6 @@
 package com.playtika.automation.service;
 
-import com.playtika.automation.controller.CarsController;
+import com.playtika.automation.web.CarsController;
 import com.playtika.automation.domain.Car;
 import com.playtika.automation.domain.CarForSale;
 import com.playtika.automation.domain.CarInfo;

@@ -1,5 +1,6 @@
 package com.playtika.automation.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 

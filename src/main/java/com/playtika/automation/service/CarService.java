@@ -15,6 +15,5 @@ public interface CarService {
     void deleteCar(long id);
 
     CarInfo getCarDetails(long id);
-
-
+    
 }

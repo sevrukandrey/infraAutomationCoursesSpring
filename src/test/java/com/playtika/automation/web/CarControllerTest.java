@@ -43,7 +43,7 @@ public class CarControllerTest {
 
         mockMvc.perform(post("/car")
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
-            .content("{\"brand\": \"Ford\",\"model\":fiesta}")
+            .content("{\"brand\": \"Ford\",\"model\":\"fiesta\"}")
             .param("price", String.valueOf(1000))
             .param("ownerContacts", "Amdre"))
             .andExpect(status().isOk())

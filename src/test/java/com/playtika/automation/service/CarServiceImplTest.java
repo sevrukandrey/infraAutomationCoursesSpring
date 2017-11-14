@@ -6,9 +6,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,6 +17,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CarServiceImplTest {
 
     private CarService carService;
+    private double price = 1000.0;
+    private String owner = "Andrey";
 
     @Before
     public void init() {
@@ -24,7 +27,31 @@ public class CarServiceImplTest {
 
     @Test
     public void shouldReturnAllCars() {
+        Car car = getCar();
+        carService.addCar(car, price, owner);
 
+        Map<Long, CarForSale> expected = new HashMap<>();
+        expected.put(1L,getCarForSale());
+
+        assertThat(carService.getAllCars()).isEqualTo(expected);
+    }
+
+    @Test
+    public void shouldReturnCorectSizeForGetAllCars() {
+
+        Car car = getCar();
+        carService.addCar(car, price, owner);
+        carService.addCar(car, price, owner);
+
+        assertThat(carService.getAllCars()).hasSize(2);
+    }
+
+
+    private Car getCar() {
+        return Car.builder()
+            .brand("ford")
+            .model("fiesta")
+            .build();
     }
 
     private CarForSale getCarForSale() {
@@ -33,7 +60,8 @@ public class CarServiceImplTest {
         carForSale.setOwnerContacts("Andrey");
         carForSale.setBrand("ford");
         carForSale.setModel("fiesta");
-        carForSale.setPrice(100);
+        carForSale.setPrice(1000);
+        return carForSale;
 
     }
 }

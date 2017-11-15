@@ -19,13 +19,14 @@ public class CarServiceImpl implements CarService {
     @Override
     public long addCar(Car car, double price, String ownerContacts) {
         long carId = generateId.incrementAndGet();
-        CarForSale carForSale = new CarForSale();
-
-        carForSale.setId(carId);
-        carForSale.setBrand(car.getBrand());
-        carForSale.setModel(car.getModel());
-        carForSale.setOwnerContacts(ownerContacts);
-        carForSale.setPrice(price);
+        CarForSale carForSale = CarForSale
+            .builder()
+            .id(carId)
+            .brand(car.getBrand())
+            .model(car.getModel())
+            .ownerContacts(ownerContacts)
+            .price(price)
+            .build();
 
         cars.put(carId, carForSale);
         return carId;

@@ -20,6 +20,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class CarControllerTest {
 
+    private double price = 1000;
+    private String owner = "Andrey";
+
     @Mock
     private CarService carService;
 
@@ -39,8 +42,9 @@ public class CarControllerTest {
         mockMvc.perform(post("/car")
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
             .content("{\"brand\": \"Ford\",\"model\":\"fiesta\"}")
-            .param("price", String.valueOf(1000))
-            .param("ownerContacts", "Amdre"))
+            .accept(MediaType.APPLICATION_JSON)
+            .param("price", String.valueOf(price))
+            .param("ownerContacts", owner))
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json;charset=UTF-8"))
             .andExpect(content().json("1"));
@@ -48,7 +52,8 @@ public class CarControllerTest {
 
     @Test
     public void addCarShouldSendBadRequestOnMissingParams() throws Exception {
-        mockMvc.perform(post("/car").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(post("/car")
+            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
     }
 

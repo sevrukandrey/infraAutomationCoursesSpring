@@ -18,20 +18,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(CarsController.class)
 public class CarsControllerIntegrationTest {
+
+    private double price = 1000.0;
+    private String owner = "Andrey";
 
     @Autowired
     private MockMvc mockMvc;
@@ -50,13 +48,13 @@ public class CarsControllerIntegrationTest {
         String contentAsString = mockMvc.perform(post("/car")
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
             .content(objectMapper.writeValueAsString(car))
-            .param("price", String.valueOf(1000))
-            .param("ownerContacts", "Amdre"))
+            .param("price", String.valueOf(price))
+            .param("ownerContacts", owner))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andReturn().getResponse().getContentAsString();
 
-        verify(carService, times(1)).addCar(car, 1000, "Amdre");
+        verify(carService, times(1)).addCar(car, price, owner);
 
         assertThat(contentAsString).isEqualTo("1");
     }
@@ -76,8 +74,8 @@ public class CarsControllerIntegrationTest {
             .andExpect(jsonPath("$.2.id", is(2)))
             .andExpect(jsonPath("$.2.model", is("x5")))
             .andExpect(jsonPath("$.2.brand", is("bmw")))
-            .andExpect(jsonPath("$.2.price", is(1000.0)))
-            .andExpect(jsonPath("$.2.ownerContacts", is("Andrey")));
+            .andExpect(jsonPath("$.2.price", is(price)))
+            .andExpect(jsonPath("$.2.ownerContacts", is(owner)));
 
         verify(carService, times(1)).getAllCars();
     }
@@ -106,8 +104,8 @@ public class CarsControllerIntegrationTest {
             .param("id", String.valueOf(1L)))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(jsonPath("$.ownerContacts", is("Andrey")))
-            .andExpect(jsonPath("$.price", is(1000.0)));
+            .andExpect(jsonPath("$.ownerContacts", is(owner)))
+            .andExpect(jsonPath("$.price", is(price)));
 
         verify(carService, times(1)).getCarDetails(1);
     }
@@ -127,19 +125,22 @@ public class CarsControllerIntegrationTest {
     }
 
     private CarForSale getCarForSale() {
-        return CarForSale.builder()
+        return CarForSale
+            .builder()
             .id(2)
             .model("x5")
             .brand("bmw")
-            .ownerContacts("Andrey")
-            .price(1000)
+            .ownerContacts(owner)
+            .price(price)
             .build();
     }
 
     private CarInfo getCarInfo() {
-        CarInfo carInfo = new CarInfo();
-        carInfo.setPrice(1000);
-        carInfo.setOwnerContacts("Andrey");
-        return carInfo;
+        return CarInfo
+            .builder()
+            .price(price)
+            .ownerContacts(owner)
+            .build();
+
     }
 }

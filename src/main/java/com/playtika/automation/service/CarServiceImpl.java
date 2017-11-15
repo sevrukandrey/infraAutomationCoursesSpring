@@ -48,10 +48,9 @@ public class CarServiceImpl implements CarService {
             throw new CarsController.ResourceNotFoundException("Car with id" + id + " not found");
         }
 
-        CarInfo carInfo = new CarInfo();
-        carInfo.setOwnerContacts(cars.get(id).getOwnerContacts());
-        carInfo.setPrice(cars.get(id).getPrice());
-
-        return carInfo;
+        return CarInfo.builder()
+            .ownerContacts(cars.get(id).getOwnerContacts())
+            .price(cars.get(id).getPrice())
+            .build();
     }
 }

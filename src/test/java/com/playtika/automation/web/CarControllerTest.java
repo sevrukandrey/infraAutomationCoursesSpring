@@ -17,7 +17,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(MockitoJUnitRunner.class)
-
 public class CarControllerTest {
 
     private double price = 1000;
@@ -33,6 +32,8 @@ public class CarControllerTest {
         mockMvc = MockMvcBuilders
             .standaloneSetup(new CarsController(carService))
             .build();
+
+        //
     }
 
     @Test

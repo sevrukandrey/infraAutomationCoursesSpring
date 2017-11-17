@@ -38,8 +38,15 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public void deleteCar(long id) {
-        cars.remove(id);
+    public boolean deleteCar(long id) {
+
+        try{
+            cars.remove(id);
+            return true;
+
+        }catch (RuntimeException e){
+            return false;
+        }
     }
 
     @Override

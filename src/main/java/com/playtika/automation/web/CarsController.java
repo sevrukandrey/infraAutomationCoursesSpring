@@ -31,7 +31,7 @@ public class CarsController {
         }
     }
 
-    @PostMapping(value = "/car")
+    @PostMapping(value = "/cars")
     public long addCar(@RequestBody Car car,
                        @RequestParam("price") double price,
                        @RequestParam("ownerContacts") String ownerContacts) {
@@ -48,13 +48,13 @@ public class CarsController {
         return carService.getAllCars();
     }
 
-    @DeleteMapping(value = "/car")
-    public void deleteCar(@RequestParam("id") long id) {
+    @DeleteMapping(value = "/cars{id}")
+    public void deleteCar(@PathVariable("id") long id) {
         carService.deleteCar(id);
     }
 
-    @GetMapping(value = "/car")
-    public CarInfo getCarDetails(@RequestParam("id") long id) {
+    @GetMapping(value = "/cars{id}")
+    public CarInfo getCarDetails(@PathVariable("id") long id) {
         return carService.getCarDetails(id);
     }
 }

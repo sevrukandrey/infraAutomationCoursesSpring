@@ -12,7 +12,7 @@ public interface CarService {
 
     Map<Long, CarForSale> getAllCars();
 
-    void deleteCar(long id);
+    boolean deleteCar(long id);
 
     CarInfo getCarDetails(long id);
     

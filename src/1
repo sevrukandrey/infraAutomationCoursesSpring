@@ -1,0 +1,136 @@
+Unit for controller n0 nned
+
+Integration --- text http-header and other
+
+in controller we get boollen or Optional an return to client some http response depends on response (404,500 ....)
+
+
+_________________________________________________________________________________________________
+
+
+delete car ---204
+              200
+              404
+
+              @RequestMapping(path="/user",method=RequestMethod.GET)
+              public ResponseEntity<List<User>> findAll() {
+               // read from database
+                List<User> users = userService.findAll();
+               return ResponseEntity.ok(users);  // return 200, with json body
+              }
+               
+              @RequestMapping(path="/user/{userId}",method=RequestMethod.GET)
+              public ResponseEntity<User> findById(@PathVariable long userId) {
+               try {
+                // read from database
+                User user = userService.findById(userId);
+                return ResponseEntity.ok(user);  // return 200, with json body
+               } catch (ResourceNotFoundException e) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); //return 404, with null body
+               }
+              }
+
+              http://shengwangi.blogspot.com/2016/02/response-for-get-post-put-delete-in-rest.html
+___________________________________________________________________________________________________
+
+
+
+ втнуть с бина сервис и в инит методе задать начальные данные
+
+ Начальные данные для системного теста
+ @Before
+ publicvoid init(){
+ BookService serive = context.getBean(BookService.class)
+ }
+
+ Или испльзовать это только ДляТЕСТА, а не для всего контекста
+
+
+___________________________________________________________________
+ SaleInfo
+ pricate final String owner
+ private final int price
+
+
+ CarSaleInfo
+
+ private final Car
+ private final SaleIndo
+
+ Car@Data
+ final model
+ final year
+
+ String color
+
+__________________________________________________________________________________________
+cars - Get
+cars - POST
+cars/{id} Delete get put
+cars{id}/saleInfo --- Get/Put
+
+_____________________________________
+
+BD
+
+Реалиционные БД -- связанные сущности
+
+User
+    id
+    name
+    age
+Order
+    id
+    totalAmount
+    list<Order>
+    User user
+    shipAddress
+OrderItem
+    itemId
+    number
+    price
+
+
+
+Sql - standard way to get data from relationship BD
+
+Select u.id,sum(o.total),count(*) From user as u
+                   Inner Join Order  --если запись есть и слева и справа(если нету то не выведет)
+                   Left Join Order   -- если слева есть а справа нету то верни все слева а с правой части налы
+                   Right Join Order as o
+                   Cross Join Order -- там где нету полей будет налы и с леваи права
+ with
+ u.id=o.user_id
+
+ Where
+ o.total > 10000
+ Grouping by
+ u.id   ---- только это поля может быть в селекте как поля для вывода
+ Having count >1
+order by sum DESC   ---- отработает перед груп бай что б отработал после весль селек надо взять в скобке и доптсать вначале селект фром
+Limit 10
+
+
+
+
+Insert INTO User (fields to insert) Values or Select();
+
+Update User Set age  =34 where id =5;
+
+Delete   From User Where age > 30;
+
+
+____________________________________________________________________________
+
+
+Up Bd
+
+Spring boot --embeded BD -- while run up Bd
+
+
+Start with docker
+
+
+
+
+

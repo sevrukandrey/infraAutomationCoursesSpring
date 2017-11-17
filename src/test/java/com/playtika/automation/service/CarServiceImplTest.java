@@ -18,15 +18,11 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 @RunWith(MockitoJUnitRunner.class)
 public class CarServiceImplTest {
 
-    private CarService carService;
+    private CarService carService = new CarServiceImpl();
     private double price = 1000.0;
     private String owner = "Andrey";
     private Long id = 1L;
 
-    @Before
-    public void init() {
-        carService = new CarServiceImpl();
-    }
 
     @Test
     public void shouldCorrectGenerateId() {

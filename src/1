@@ -57,7 +57,8 @@ ___________________________________________________________________
  private final Car
  private final SaleIndo
 
- Car@Data
+ Car
+ @Data
  final model
  final year
 

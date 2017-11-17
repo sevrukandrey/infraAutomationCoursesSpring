@@ -1,15 +1,15 @@
 package com.playtika.automation.web;
 
 import com.playtika.automation.domain.Car;
-import com.playtika.automation.domain.CarForSale;
-import com.playtika.automation.domain.CarInfo;
+import com.playtika.automation.domain.CarSaleInfo;
+import com.playtika.automation.domain.SaleInfo;
 import com.playtika.automation.service.CarService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import java.util.Collection;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
@@ -44,7 +44,7 @@ public class CarsController {
     }
 
     @GetMapping(value = "/cars")
-    public Map<Long, CarForSale> getAllCars() {
+    public Collection<CarSaleInfo> getAllCars() {
         return carService.getAllCars();
     }
 
@@ -54,7 +54,7 @@ public class CarsController {
     }
 
     @GetMapping(value = "/cars{id}")
-    public CarInfo getCarDetails(@PathVariable("id") long id) {
-        return carService.getCarDetails(id);
+    public SaleInfo getCarDetails(@PathVariable("id") long id) {
+        return carService.getSaleInfo(id);
     }
 }

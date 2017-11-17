@@ -1,19 +1,19 @@
 package com.playtika.automation.service;
 
 import com.playtika.automation.domain.Car;
-import com.playtika.automation.domain.CarForSale;
-import com.playtika.automation.domain.CarInfo;
+import com.playtika.automation.domain.CarSaleInfo;
+import com.playtika.automation.domain.SaleInfo;
 
-import java.util.Map;
+import java.util.Collection;
 
 public interface CarService {
 
     long addCar(Car car, double price, String ownerContacts);
 
-    Map<Long, CarForSale> getAllCars();
+     Collection<CarSaleInfo> getAllCars();
 
     boolean deleteCar(long id);
 
-    CarInfo getCarDetails(long id);
+    SaleInfo getSaleInfo(long id);
     
 }

@@ -5,6 +5,7 @@ import lombok.*;
 @Data
 @Builder()
 public class Car {
-    private String brand;
-    private String model;
+
+    private final String brand;
+    private final String model;
 }

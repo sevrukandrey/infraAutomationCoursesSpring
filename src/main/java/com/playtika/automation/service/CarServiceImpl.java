@@ -2,10 +2,11 @@ package com.playtika.automation.service;
 
 import com.playtika.automation.web.CarsController;
 import com.playtika.automation.domain.Car;
-import com.playtika.automation.domain.CarForSale;
-import com.playtika.automation.domain.CarInfo;
+import com.playtika.automation.domain.CarSaleInfo;
+import com.playtika.automation.domain.SaleInfo;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -14,50 +15,43 @@ import java.util.concurrent.atomic.AtomicLong;
 public class CarServiceImpl implements CarService {
 
     private final AtomicLong generateId = new AtomicLong();
-    private final Map<Long, CarForSale> cars = new ConcurrentHashMap<>();
+    private final Map<Long, CarSaleInfo> cars = new ConcurrentHashMap<>();
 
     @Override
     public long addCar(Car car, double price, String ownerContacts) {
         long carId = generateId.incrementAndGet();
-        CarForSale carForSale = CarForSale
-            .builder()
-            .id(carId)
-            .brand(car.getBrand())
-            .model(car.getModel())
-            .ownerContacts(ownerContacts)
-            .price(price)
-            .build();
+
+        CarSaleInfo carForSale =new CarSaleInfo(carId, car, new SaleInfo(ownerContacts, price));
 
         cars.put(carId, carForSale);
+
+
+        System.out.println(cars.toString());
         return carId;
     }
 
     @Override
-    public Map<Long, CarForSale> getAllCars() {
-        return cars;
+    public Collection<CarSaleInfo> getAllCars() {
+        return cars.values();
     }
 
     @Override
     public boolean deleteCar(long id) {
 
-        try{
-            cars.remove(id);
-            return true;
-
-        }catch (RuntimeException e){
+        if (cars.get(id) == null) {
             return false;
+        } else {
+            cars.remove(id);
         }
+        return true;
     }
 
     @Override
-    public CarInfo getCarDetails(long id) {
+    public SaleInfo getSaleInfo(long id) {
         if (cars.get(id) == null) {
-            throw new CarsController.ResourceNotFoundException("Car with id" + id + " not found");
+            System.out.println("!!!!!!!!!!!!!!");
         }
-
-        return CarInfo.builder()
-            .ownerContacts(cars.get(id).getOwnerContacts())
-            .price(cars.get(id).getPrice())
-            .build();
+        System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+        return cars.get(id).getSaleInfo();
     }
 }

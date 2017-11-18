@@ -4,32 +4,40 @@ import com.playtika.automation.domain.Car;
 import com.playtika.automation.domain.CarSaleInfo;
 import com.playtika.automation.domain.SaleInfo;
 import com.playtika.automation.service.CarService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
 @RestController
 @Slf4j
 @RequestMapping(produces = APPLICATION_JSON_UTF8_VALUE)
+@RequiredArgsConstructor
 public class CarsController {
+
     private final CarService carService;
 
-    @Autowired
-    public CarsController(CarService carService) {
-        this.carService = carService;
-    }
-
-    @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "No such Id")
-    public static class ResourceNotFoundException extends RuntimeException {
+    @ResponseStatus(value = NOT_FOUND)
+    public static class ResourceNotFoundException extends NullPointerException {
         public ResourceNotFoundException(String message) {
             super(message);
         }
     }
+
+    @ResponseStatus(value = HttpStatus.OK, reason = "OK")
+    public static class okResponse extends RuntimeException {
+        public okResponse() {
+
+        }
+    }
+
 
     @PostMapping(value = "/cars")
     public long addCar(@RequestBody Car car,
@@ -44,17 +52,21 @@ public class CarsController {
     }
 
     @GetMapping(value = "/cars")
-    public Collection<CarSaleInfo> getAllCars() {
+    public List<CarSaleInfo> getAllCars() {
         return carService.getAllCars();
     }
 
-    @DeleteMapping(value = "/cars{id}")
+    @DeleteMapping(value = "/cars/{id}")
     public void deleteCar(@PathVariable("id") long id) {
         carService.deleteCar(id);
     }
 
-    @GetMapping(value = "/cars{id}")
+    @GetMapping(value = "/cars/{id}")
     public SaleInfo getCarDetails(@PathVariable("id") long id) {
-        return carService.getSaleInfo(id);
+        try{
+            return carService.getSaleInfo(id).orElseThrow(NullPointerException::new);
+        }catch (NullPointerException e){
+            throw new ResourceNotFoundException("There is no Sale Info for car with id  " + id);
+        }
     }
 }

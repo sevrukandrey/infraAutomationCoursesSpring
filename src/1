@@ -40,7 +40,15 @@ ________________________________________________________________________________
  Начальные данные для системного теста
  @Before
  publicvoid init(){
- BookService serive = context.getBean(BookService.class)
+ mockMvc.perform(post("/cars")
+                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                .content("{\"brand\": \"Ford\",\"model\":\"fiesta\"}")
+                .param("price", String.valueOf(1000))
+                .param("ownerContacts", "Amdre"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(content().json("1")
+                );
  }
 
  Или испльзовать это только ДляТЕСТА, а не для всего контекста

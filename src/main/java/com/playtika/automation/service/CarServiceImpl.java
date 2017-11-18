@@ -6,8 +6,7 @@ import com.playtika.automation.domain.CarSaleInfo;
 import com.playtika.automation.domain.SaleInfo;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -25,33 +24,22 @@ public class CarServiceImpl implements CarService {
 
         cars.put(carId, carForSale);
 
-
-        System.out.println(cars.toString());
         return carId;
     }
 
     @Override
-    public Collection<CarSaleInfo> getAllCars() {
-        return cars.values();
+    public List<CarSaleInfo> getAllCars() {
+    return new ArrayList<>(cars.values());
     }
 
     @Override
-    public boolean deleteCar(long id) {
-
-        if (cars.get(id) == null) {
-            return false;
-        } else {
-            cars.remove(id);
-        }
-        return true;
+    public void deleteCar(long id) {
+           cars.remove(id);
     }
 
     @Override
-    public SaleInfo getSaleInfo(long id) {
-        if (cars.get(id) == null) {
-            System.out.println("!!!!!!!!!!!!!!");
-        }
-        System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-        return cars.get(id).getSaleInfo();
+    public Optional<SaleInfo> getSaleInfo(long id) {
+
+        return Optional.of(cars.get(id).getSaleInfo());
     }
 }

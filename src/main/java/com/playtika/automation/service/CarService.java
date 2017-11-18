@@ -5,15 +5,17 @@ import com.playtika.automation.domain.CarSaleInfo;
 import com.playtika.automation.domain.SaleInfo;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 public interface CarService {
 
     long addCar(Car car, double price, String ownerContacts);
 
-     Collection<CarSaleInfo> getAllCars();
+    List<CarSaleInfo> getAllCars();
 
-    boolean deleteCar(long id);
+    void deleteCar(long id);
 
-    SaleInfo getSaleInfo(long id);
-    
+    Optional<SaleInfo> getSaleInfo(long id);
+
 }

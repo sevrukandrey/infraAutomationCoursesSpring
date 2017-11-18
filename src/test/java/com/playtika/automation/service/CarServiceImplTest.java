@@ -7,12 +7,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CarServiceImplTest {
@@ -25,64 +24,24 @@ public class CarServiceImplTest {
 
     @Test
     public void shouldCorrectGenerateId() {
-
-        assertThat(carService.addCar(getCar(), price, owner)).isEqualTo(1);
-    }
-
-    @Test
-    public void shouldGenerateNewId() {
         carService.addCar(getCar(), price, owner);
-
         assertThat(carService.addCar(getCar(), price, owner)).isEqualTo(2);
     }
 
-//    @Test
-//    public void shouldSaveCarWithParametersToCollection() {
-//        Car car = getCar();
-//        Map<Long, CarSaleInfo> cars = new ConcurrentHashMap<>();
-//        cars.put(id, getCarForSale());
-//
-//        carService.addCar(car, price, owner);
-//
-//        assertThat(carService.getAllCars()).isEqualTo(cars);
-//    }
-//
-//    @Test
-//    public void shouldHasCorrectSizeOfCollection() {
-//        Car car = getCar();
-//        Map<Long, CarSaleInfo> cars = new ConcurrentHashMap<>();
-//        cars.put(id, getCarForSale());
-//        cars.put(id + 1, getCarForSale());
-//
-//
-//        carService.addCar(car, price, owner);
-//        carService.addCar(car, price, owner);
-//
-//        assertThat(carService.getAllCars().size()).isEqualTo(cars.size());
-//    }
-//
-//    @Test
-//    public void shouldReturnAllCars() {
-//        addCarToCollection();
-//
-//        Map<Long, CarSaleInfo> expected = new HashMap<>();
-//        expected.put(1L, getCarForSale());
-//
-//        assertThat(carService.getAllCars()).isEqualTo(expected);
-//    }
-
     @Test
-    public void shouldReturnCorrectSizeForGetAllCars() {
-        addCarsToCollection();
+    public void shouldReturnAllCars() {
+        addCarToCollection();
 
-        assertThat(carService.getAllCars()).hasSize(2);
+        List<CarSaleInfo> expected = new ArrayList<>();
+        expected.add(getCarSaleInfo());
+
+        assertThat(carService.getAllCars()).isEqualTo(expected);
     }
 
     @Test
     public void shouldReturnEmptyMapIfCollectionOfCarIsEmpty() {
         assertThat(carService.getAllCars()).isEmpty();
     }
-
 
     @Test
     public void shouldDeleteCarById() {
@@ -94,30 +53,13 @@ public class CarServiceImplTest {
     }
 
     @Test
-    public void shouldNotThrowExceptionIfCarByIdNotFound() {
-        addCarToCollection();
+    public void shouldGetCarSaleInfoById() {
+        addCarsToCollection();
 
-        assertThatCode(() -> {
-            carService.deleteCar(1);
-        }).doesNotThrowAnyException();
+        Optional<SaleInfo> expected = Optional.of(new SaleInfo(owner, price));
 
+        assertThat(carService.getSaleInfo(1)).isEqualTo(expected);
     }
-//
-//    @Test
-//    public void shouldGetCarDetailsById() {
-//        addCarsToCollection();
-//
-//        SaleInfo expected = getCarInfo(owner, price);
-//
-//        assertThat(carService.getSaleInfo(1)).isEqualTo(expected);
-//    }
-
-//    private SaleInfo getCarInfo(String owner, double price) {
-//        return SaleInfo.builder()
-//            .ownerContacts(owner)
-//            .price(price)
-//            .build();
-//    }
 
     private void addCarToCollection() {
         Car car = getCar();
@@ -125,21 +67,8 @@ public class CarServiceImplTest {
     }
 
     private Car getCar() {
-        return Car.builder()
-            .brand("ford")
-            .model("fiesta")
-            .build();
+        return new Car("ford", "fiesta");
     }
-
-//    private CarSaleInfo getCarForSale() {
-//        return CarSaleInfo.builder().
-//            id(1)
-//            .ownerContacts(owner)
-//            .brand("ford")
-//            .model("fiesta")
-//            .price(price)
-//            .build();
-//    }
 
     private void addCarsToCollection() {
         Car car = getCar();
@@ -147,4 +76,7 @@ public class CarServiceImplTest {
         carService.addCar(car, price, owner);
     }
 
+    private CarSaleInfo getCarSaleInfo() {
+        return new CarSaleInfo(1, getCar(), new SaleInfo(owner, price));
+    }
 }

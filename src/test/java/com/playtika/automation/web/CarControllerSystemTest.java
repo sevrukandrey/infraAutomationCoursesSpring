@@ -12,18 +12,19 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class CarControllerSystemTest {
 
     @Autowired
     private WebApplicationContext context;
-
 
     private MockMvc mockMvc;
 
@@ -40,38 +41,75 @@ public class CarControllerSystemTest {
                 .param("price", String.valueOf(1000))
                 .param("ownerContacts", "Amdre"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8")).andReturn().
-                        getResponse()
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn()
+                .getResponse()
                 .getContentAsString();
 
         assertThat(id).isEqualTo("1");
-
     }
 
 
     @Test
     public void shouldReturnAllCars() throws Exception {
-        String result = mockMvc.perform(get("/cars")
+
+        mockMvc.perform(post("/cars")
+                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                .content("{\"brand\": \"Ford\",\"model\":\"fiesta\"}")
+                .param("price", String.valueOf(1000))
+                .param("ownerContacts", "Andrey"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/cars")
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8")).andReturn().getResponse().getContentAsString();
-
-        assertThat(result).isNotEmpty();
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$.[0].id", is(1)))
+                .andExpect(jsonPath("$.[0]car.model", is("fiesta")))
+                .andExpect(jsonPath("$.[0]car.brand", is("Ford")))
+                .andExpect(jsonPath("$.[0]saleInfo.price", is(1000.0)))
+                .andExpect(jsonPath("$.[0]saleInfo.ownerContacts", is("Andrey")));
     }
 
     @Test
     public void shouldDeleteCarById() throws Exception {
+        mockMvc.perform(post("/cars")
+                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                .content("{\"brand\": \"Ford\",\"model\":\"fiesta\"}")
+                .param("price", String.valueOf(1000))
+                .param("ownerContacts", "Amdre"))
+                .andExpect(status().isOk());
+
        mockMvc.perform(delete("/cars/1")
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(status().isOk());
+
+       String result =  mockMvc.perform(get("/cars")
+                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+       assertThat(result).isEqualTo("[]");
     }
 
     @Test
     public void shouldGetSaleInfoByCarId() throws Exception {
-        mockMvc.perform(get("/cars/1")
+
+        mockMvc.perform(post("/cars")
+                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                .content("{\"brand\": \"Ford\",\"model\":\"fiesta\"}")
+                .param("price", String.valueOf(1000))
+                .param("ownerContacts", "Amdre"))
+                .andExpect(status().isOk());
+
+        String result = mockMvc.perform(get("/cars/2")
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"));
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        assertThat(result).isEqualTo("a");
     }
 
 }

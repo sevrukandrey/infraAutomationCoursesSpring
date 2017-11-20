@@ -46,7 +46,7 @@ public class CarControllerSystemTest {
                 .getResponse()
                 .getContentAsString();
 
-        assertThat(id).isEqualTo("1");
+        assertThat(Long.valueOf(id)).isGreaterThan(0L);
     }
 
 
@@ -64,7 +64,6 @@ public class CarControllerSystemTest {
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andExpect(jsonPath("$.[0].id", is(1)))
                 .andExpect(jsonPath("$.[0]car.model", is("fiesta")))
                 .andExpect(jsonPath("$.[0]car.brand", is("Ford")))
                 .andExpect(jsonPath("$.[0]saleInfo.price", is(1000.0)))
@@ -93,23 +92,15 @@ public class CarControllerSystemTest {
 
     @Test
     public void shouldGetSaleInfoByCarId() throws Exception {
-
-        mockMvc.perform(post("/cars")
-                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
-                .content("{\"brand\": \"Ford\",\"model\":\"fiesta\"}")
-                .param("price", String.valueOf(1000))
-                .param("ownerContacts", "Amdre"))
-                .andExpect(status().isOk());
-
-        String result = mockMvc.perform(get("/cars/2")
+        mockMvc.perform(get("/cars/2/")
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$.ownerContacts", is("Andrey")))
+                .andExpect(jsonPath("$.price", is(1000.0)))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-
-        assertThat(result).isEqualTo("a");
     }
 
 }

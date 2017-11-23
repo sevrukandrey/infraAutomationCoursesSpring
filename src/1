@@ -142,4 +142,135 @@ Start with docker
 
 
 
+___________________________________________________________________________________________________________________________
+
+
+
+
+_____________________________________________________________________________________________________________________________-
+
+
+
+1.Sql query returns table
+
+
+Steps to execute sql query from java:
+1.Java goes to host and port and open connection ----> JDBS(open connection from code) +
++ driver (MySql, Oracle)
+2.Create Statement --> create sql state before execute
+3.Execute;
+2.1.Get Table as ResultSet(iterator(hasNex,next, read currect row))
+2.2 Close resources ---> close statement ---> close connection --> close transactio
+
+
+
+
+________________________________________________________________________________________________________________________
+
+pom
+add starter jdbc(get drivers for my database)
+
+in Service Implementation
+
+@Autowired
+private JdbcTemplate template
+
+template.execute ("delete from car")
+template.query("select * from car where name =?", new Object[] {"BMW"}, ColumnMapRowMapper())
+
+
+List<Car> result = template.query("select * from car where name =?", new Object[] {"BMW"}, BeenPropertyRowMapper<>(Car.class))
+
+                                                                                            new RowMapper<Car>(){
+                                                                                            return new Car(rs.getString("owner_name"), re.getInt("year"))
+                                                                                            }
+
+
+
+
+1. need test
+2. not use *
+
+Jdbc template good for simple request
+template.queryForObject("select count(*) from car ",Long.class)
+template.execute ("delete from car")
+
+Problem not garanted that field has same name in DB;
+
+________________________________________________________________________________________________________________________
+
+
+
+                                            Hibernate
+                                            JPA
+________________________________________________________________________________________________________________________
+
+ORM --> Hiberanete;
+
+1.Sql --> hql
+2.Validate mapping
+3.Db structure generation;
+
+
+Db native --
+sql -- запросы для любой бд
+jdbc -- работа с любой базой
+hibernate -- работа с стиле ОРМ
+jpa -- стандартизация
+spring date--
+spring date rest
+
+____________________________________________________________________
+need jpa starter
+
+
+@Entity  ---> hibernate-jpa
+
+public Book {    (table Book)
+@id
+@GenerateValue(strarategy = GT.Indentety)
+long id
+
+application properties
+
+
+sprinf.jpa.hibernate
+
+
+loquibase.anabled
+flyway.enabled
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

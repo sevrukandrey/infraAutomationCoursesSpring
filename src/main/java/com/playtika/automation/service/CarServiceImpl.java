@@ -13,10 +13,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -46,8 +43,7 @@ public class CarServiceImpl implements CarService {
    
     @Override
     public List<CarSaleInfo> getAllCars() {
-
-return new ArrayList<>();
+        return Collections.emptyList();
     }
 
     @Override
@@ -60,22 +56,17 @@ return new ArrayList<>();
     @Override
     public Optional<SaleInfo> getSaleInfo(long id) {
 
-        Query query = manager.createQuery
-                ("select a from AdvertEntity a where a.carId=: id");
+        List<CarEntity> resultList = manager.createQuery("select c from car c join c.clientEntities where c.id=:id", CarEntity.class)
+                .setParameter("id", id)
+                .getResultList();
 
-        query.setParameter("id", id);
-
-        Long sellerId = query.getResultList().get(0).getSellerId();
-        Double price = query.getResultList().get(0).getPrice();
-
-        TypedQuery<ClientEntity> query2 = manager.createQuery("select * from ClientEntity where clientId=:sellerId", ClientEntity.class)
-                .setParameter("sellerId", sellerId);
-        String phoneNumber = query2.getResultList().get(0).getPhoneNumber();
-
-        SaleInfo saleInfo = new SaleInfo(phoneNumber, price);
+        resultList.get(0).getClientEntities().get(0).getPhoneNumber();
 
 
-        return Optional.ofNullable(saleInfo);
+        manager.createQuery("select * from ");
+
+
+        return Optional.empty();
     }
 
     private ClientEntity getSaveSellerAndGetSellerEntity(String ownerContacts) {

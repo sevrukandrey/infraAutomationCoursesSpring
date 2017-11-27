@@ -3,10 +3,15 @@ package com.playtika.automation.service;
 import com.playtika.automation.domain.Car;
 import com.playtika.automation.domain.CarSaleInfo;
 import com.playtika.automation.domain.SaleInfo;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import javax.persistence.EntityManager;
+import javax.swing.text.html.parser.Entity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -14,19 +19,32 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(MockitoJUnitRunner.class)
+@DataJpaTest
 public class CarServiceImplTest {
 
-    private CarService carService = new CarServiceImpl();
+
     private double price = 1000.0;
     private String owner = "Andrey";
     private Long id = 1L;
-//
-//
-//    @Test
-//    public void shouldCorrectGenerateId() {
-//        carService.addCar(getCar(), price, owner);
-//        assertThat(carService.addCar(getCar(), price, owner)).isEqualTo(2);
-//    }
+
+    @Autowired
+    EntityManager manager;
+
+    @Autowired
+    CarService carService;
+
+    @Before
+    public void setUp(){
+        carService = new CarServiceImpl();
+    }
+
+
+    @Test
+    public void shouldCorrectGenerateId() {
+
+        carService.addCar(getCar(), price, owner);
+        assertThat(carService.addCar(getCar(), price, owner)).isEqualTo(2);
+    }
 //
 //    @Test
 //    public void shouldReturnAllCars() {
@@ -66,9 +84,9 @@ public class CarServiceImplTest {
 //        carService.addCar(car, price, owner);
 //    }
 //
-//    private Car getCar() {
-//        return new Car("ford", "fiesta");
-//    }
+    private Car getCar() {
+        return new Car("ford", "fiesta", "12-12", "green", 2016);
+    }
 //
 //    private void addCarsToCollection() {
 //        Car car = getCar();

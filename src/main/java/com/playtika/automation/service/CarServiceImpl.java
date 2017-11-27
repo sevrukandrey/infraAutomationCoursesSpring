@@ -24,37 +24,37 @@ public class CarServiceImpl implements CarService {
     private final Map<Long, CarSaleInfo> cars = new ConcurrentHashMap<>();
 
     @PersistenceContext
-    private  EntityManager manager;
+    private EntityManager manager;
 
     @Override
     public long addCar(Car car, double price, String ownerContacts) {
-        
+
         AdvertEntity advertEntity = new AdvertEntity();
         advertEntity.setCarId(saveCarAndGetCarEntity(car).getId());
         advertEntity.setPrice(price);
         advertEntity.setSellerId(getSaveSellerAndGetSellerEntity(ownerContacts).getId());
-        
+
         manager.persist(advertEntity);
-        //manager.flush();
 
         return advertEntity.getId();
     }
 
-   
+
     @Override
     public List<CarSaleInfo> getAllCars() {
-        return Collections.emptyList();
+
+return Collections.emptyList();
     }
 
     @Override
     public void deleteCar(long id) {
-        manager.createQuery("delete from CarEntity where id=:id")
-                .setParameter("id", id)
-                .executeUpdate();
+        manager.createQuery("delete from CarEntity where id=:id", CarEntity.class)
+            .setParameter("id", id)
+            .executeUpdate();
     }
 
     @Override
-    public Optional<SaleInfo> getSaleInfo(long id) {
+    public Optional<SaleInfo> getSaleInfo(long carId) {
 
         List<CarEntity> resultList = manager.createQuery("select c from car c join c.clientEntities where c.id=:id", CarEntity.class)
                 .setParameter("id", id)
@@ -93,7 +93,6 @@ public class CarServiceImpl implements CarService {
         carEntity.setPlateNumber(car.getPlateNumber());
         carEntity.setYear(car.getYear());
         manager.persist(carEntity);
-        manager.flush();
 
         return carEntity;
     }

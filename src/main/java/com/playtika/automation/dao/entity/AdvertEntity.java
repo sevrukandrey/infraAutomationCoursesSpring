@@ -12,12 +12,18 @@ public class AdvertEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    //@OneToOne
-    private Long carId;
-   // @OneToOne
-    private Long sellerId;
+
+    @ManyToOne()
+    @JoinColumn(name = "id")
+    private CarEntity carId;
+
+    @ManyToOne()
+    @JoinColumn(name = "id")
+    private ClientEntity sellerId;
     private Double price;
-   // @OneToOne
+
+    @ManyToOne()
+    @JoinColumn(name = "id")
     private Long dealId;
 
     private String status = "Open";

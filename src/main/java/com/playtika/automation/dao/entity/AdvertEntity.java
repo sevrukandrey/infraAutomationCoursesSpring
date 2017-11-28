@@ -24,7 +24,7 @@ public class AdvertEntity {
 
     @ManyToOne()
     @JoinColumn(name = "id")
-    private Long dealId;
+    private DealEntity dealId;
 
     private String status = "Open";
 

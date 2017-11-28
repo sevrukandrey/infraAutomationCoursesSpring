@@ -19,6 +19,7 @@ public class AdvertEntity {
     private Double price;
    // @OneToOne
     private Long dealId;
-    private String status;
+
+    private String status = "Open";
 
 }

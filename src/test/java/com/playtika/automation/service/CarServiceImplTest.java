@@ -22,7 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 public class CarServiceImplTest {
 
-
     private double price = 1000.0;
     private String owner = "Andrey";
     private Long id = 1L;

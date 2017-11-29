@@ -4,7 +4,6 @@ import com.playtika.automation.domain.Car;
 import com.playtika.automation.domain.CarSaleInfo;
 import com.playtika.automation.domain.SaleInfo;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 

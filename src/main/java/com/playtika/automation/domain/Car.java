@@ -1,13 +1,15 @@
 package com.playtika.automation.domain;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class Car {
 
-    private final String brand;
-    private final String model;
-    private final String plateNumber;
-    private final String color;
-    private final int year;
+    private  String brand;
+    private  String model;
+    private  String plateNumber;
+    private  String color;
+    private  int year;
 }

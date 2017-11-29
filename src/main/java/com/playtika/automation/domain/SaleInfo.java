@@ -2,9 +2,10 @@ package com.playtika.automation.domain;
 
 import lombok.*;
 
-
 @Data
+@AllArgsConstructor
 public class SaleInfo {
-    private final String ownerContacts;
-    private final double price;
+
+    private String ownerContacts;
+    private double price;
 }

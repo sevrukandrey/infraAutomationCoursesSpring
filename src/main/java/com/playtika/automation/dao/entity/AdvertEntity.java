@@ -1,31 +1,35 @@
 package com.playtika.automation.dao.entity;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.playtika.automation.domain.AdvertStatus;
+import lombok.Data;
 
 import javax.persistence.*;
 
+import static javax.persistence.CascadeType.REMOVE;
+import static javax.persistence.EnumType.STRING;
+import static javax.persistence.GenerationType.AUTO;
+
 @Entity(name = "advert")
-@Getter
-@Setter
+@Data
 public class AdvertEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = AUTO)
     private Long id;
 
-    @ManyToOne()
+    @ManyToOne(cascade = REMOVE)
     @JoinColumn(name = "car_id")
-    private CarEntity carId;
+    private CarEntity car;
 
-    @ManyToOne()
-    @JoinColumn(name = "client_id")
-    private ClientEntity sellerId;
-    private Double price;
+    @ManyToOne
+    @JoinColumn(name = "seller_id")
+    private ClientEntity clientId;
 
     @ManyToOne()
     @JoinColumn(name = "deal_id")
     private DealEntity dealId;
 
-    private String status = "Open";
+    private double price;
 
+    @Enumerated(STRING)
+    private AdvertStatus status;
 }

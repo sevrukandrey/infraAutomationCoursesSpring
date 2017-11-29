@@ -1,19 +1,23 @@
 package com.playtika.automation.dao.entity;
 
+import com.playtika.automation.domain.DealStatus;
+import lombok.Data;
+
 import javax.persistence.*;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+
+import static javax.persistence.EnumType.*;
+import static javax.persistence.GenerationType.AUTO;
 
 @Entity(name = "deal")
+@Data
 public class DealEntity {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = AUTO)
     private Long id;
     private long buyerId;
-    private Double price;
+    private double price;
     private long advertId;
-    private String status;
-
-
+    @Enumerated(STRING)
+    private DealStatus status;
 }

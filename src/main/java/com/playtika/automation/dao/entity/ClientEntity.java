@@ -1,21 +1,21 @@
 package com.playtika.automation.dao.entity;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-import javax.persistence.*;
-import java.util.List;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
+import static javax.persistence.GenerationType.AUTO;
 
 @Entity(name = "client")
-@Getter
-@Setter
+@Data
 public class ClientEntity {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    @GeneratedValue(strategy = AUTO)
+    private long id;
     private String name;
     private String surname;
     private String phoneNumber;
-    @OneToMany(mappedBy = "id")
-    List<AdvertEntity> advertEntities;
 }

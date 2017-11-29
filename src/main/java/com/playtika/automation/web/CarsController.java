@@ -31,12 +31,6 @@ public class CarsController {
         }
     }
 
-    @ResponseStatus(value = HttpStatus.OK, reason = "OK")
-    public static class okResponse extends RuntimeException {
-        public okResponse() {
-
-        }
-    }
 
 
     @PostMapping(value = "/cars")

@@ -19,6 +19,7 @@ public class CarEntity {
     private  int year;
     private String color;
     private String model;
+    private String brand;
 
     @OneToMany(mappedBy = "id")
     List<ClientEntity> clientEntities;

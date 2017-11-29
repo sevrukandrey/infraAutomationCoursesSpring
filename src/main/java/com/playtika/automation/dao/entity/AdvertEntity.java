@@ -14,16 +14,16 @@ public class AdvertEntity {
     private Long id;
 
     @ManyToOne()
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "car_id")
     private CarEntity carId;
 
     @ManyToOne()
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "client_id")
     private ClientEntity sellerId;
     private Double price;
 
     @ManyToOne()
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "deal_id")
     private DealEntity dealId;
 
     private String status = "Open";

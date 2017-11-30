@@ -1,6 +1,7 @@
 package com.playtika.automation.dao.entity;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,7 +10,8 @@ import javax.persistence.Id;
 import static javax.persistence.GenerationType.AUTO;
 
 @Entity(name = "client")
-@Data
+@Getter
+@Setter
 public class ClientEntity {
 
     @Id

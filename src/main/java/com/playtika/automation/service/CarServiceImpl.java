@@ -1,6 +1,8 @@
 package com.playtika.automation.service;
 
-import com.playtika.automation.dao.entity.*;
+import com.playtika.automation.dao.entity.AdvertEntity;
+import com.playtika.automation.dao.entity.CarEntity;
+import com.playtika.automation.dao.entity.ClientEntity;
 import com.playtika.automation.domain.AdvertStatus;
 import com.playtika.automation.domain.Car;
 import com.playtika.automation.domain.CarSaleInfo;
@@ -13,11 +15,8 @@ import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
-import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
-import static org.springframework.dao.support.DataAccessUtils.singleResult;
 
 @Service
 @Transactional
@@ -25,7 +24,7 @@ import static org.springframework.dao.support.DataAccessUtils.singleResult;
 public class CarServiceImpl implements CarService {
 
     @PersistenceContext
-    private final EntityManager manager;
+    private final EntityManager entityManager;
 
     @Override
     public long addCar(Car car, double price, String ownerContacts) {
@@ -39,82 +38,67 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public List<CarSaleInfo> getAllCars() {
-        List<AdvertEntity> resultList = manager.createQuery("SELECT a from advert a " +
-            "where a.status='OPEN'", AdvertEntity.class)
-            .getResultList();
-
-        return resultList
-            .stream()
-            .map(this::toCarSaleInfo)
-            .collect(toList());
+        return entityManager.createQuery("SELECT a from advert a " +
+                "where a.status='OPEN'", AdvertEntity.class)
+                .getResultList().stream()
+                .map(this::toCarSaleInfo)
+                .collect(toList());
     }
 
     @Override
     public void deleteCar(long carId) {
-        List<AdvertEntity> resultList = manager.createQuery("select a from advert a join a.car c " +
-            "where c.id=:carId", AdvertEntity.class)
-            .setParameter("carId", carId)
-            .getResultList();
-
-        resultList.forEach(manager::remove);
+        entityManager.createQuery("delete from advert a where a.car.id=:carId ")
+                .setParameter("carId", carId)
+                .executeUpdate();
     }
 
     @Override
     public Optional<SaleInfo> getSaleInfo(long carId) {
-        List<AdvertEntity> resultList = manager.createQuery("select a from advert a join a.car c " +
-            "where c.id=:carId AND a.status = 'OPEN'", AdvertEntity.class)
-            .setParameter("carId", carId)
-            .getResultList();
-
-        AdvertEntity advertEntity = singleResult(resultList);
-
-        return ofNullable(advertEntity).map(advert ->
-            new SaleInfo(advert.getClientId().getPhoneNumber(), advert.getPrice()));
-
+        return entityManager.createQuery("select a from advert a join a.car c " +
+                "where c.id=:carId AND a.status = 'OPEN'", AdvertEntity.class)
+                .setParameter("carId", carId)
+                .getResultList()
+                .stream()
+                .findFirst()
+                .map(this::toSaleInfo);
     }
 
     private CarEntity getOrCreateCarEntity(Car car) {
-        List<CarEntity> carEntities = manager.createQuery("select c from car c " +
-            "where c.plateNumber=:plateNumber", CarEntity.class)
-            .setParameter("plateNumber", car.getPlateNumber())
-            .getResultList();
-
-        CarEntity carEntity = singleResult(carEntities);
-        if (carEntity == null) {
-            carEntity = saveCarAndGetCarEntity(car);
-        }
-        return carEntity;
+        return entityManager.createQuery("select c from car c " +
+                "where c.plateNumber=:plateNumber", CarEntity.class)
+                .setParameter("plateNumber", car.getPlateNumber())
+                .getResultList()
+                .stream()
+                .findFirst()
+                .orElseGet(() -> saveCarAndGetCarEntity(car));
     }
 
     private AdvertEntity persistAdvertEntity(double price, CarEntity carEntity, ClientEntity clientEntity) {
         AdvertEntity advertEntity = new AdvertEntity();
         advertEntity.setCar(carEntity);
         advertEntity.setPrice(price);
-        advertEntity.setClientId(clientEntity);
+        advertEntity.setClient(clientEntity);
         advertEntity.setStatus(AdvertStatus.OPEN);
 
-        manager.persist(advertEntity);
+        entityManager.persist(advertEntity);
         return advertEntity;
     }
 
     private ClientEntity getOrCreateClientEntity(String ownerContacts) {
-        List<ClientEntity> clientEntities = manager.createQuery("select c from client c " +
+        return entityManager.createQuery("select c from client c " +
                 "where c.phoneNumber=:phoneNumber", ClientEntity.class)
-            .setParameter("phoneNumber", ownerContacts)
-            .getResultList();
-
-        ClientEntity clientEntity = singleResult(clientEntities);
-        if (clientEntity == null) {
-            clientEntity = saveClientAndGetClientEntity(ownerContacts);
-        }
-        return clientEntity;
+                .setParameter("phoneNumber", ownerContacts)
+                .getResultList()
+                .stream()
+                .findFirst()
+                .orElseGet(() -> saveClientAndGetClientEntity(ownerContacts));
     }
 
     private ClientEntity saveClientAndGetClientEntity(String ownerContacts) {
         ClientEntity clientEntity = new ClientEntity();
         clientEntity.setPhoneNumber(ownerContacts);
 
-        manager.persist(clientEntity);
+        entityManager.persist(clientEntity);
 
         return clientEntity;
     }
@@ -127,7 +111,7 @@ public class CarServiceImpl implements CarService {
         carEntity.setPlateNumber(car.getPlateNumber());
         carEntity.setYear(car.getYear());
 
-        manager.persist(carEntity);
+        entityManager.persist(carEntity);
 
         return carEntity;
     }
@@ -137,14 +121,14 @@ public class CarServiceImpl implements CarService {
     }
 
     private SaleInfo toSaleInfo(AdvertEntity advert) {
-        return new SaleInfo(advert.getClientId().getPhoneNumber(), advert.getPrice());
+        return new SaleInfo(advert.getClient().getPhoneNumber(), advert.getPrice());
     }
 
     private Car toCar(CarEntity carEntity) {
         return new Car(carEntity.getBrand(),
-            carEntity.getModel(),
-            carEntity.getPlateNumber(),
-            carEntity.getColor(),
-            carEntity.getYear());
+                carEntity.getModel(),
+                carEntity.getPlateNumber(),
+                carEntity.getColor(),
+                carEntity.getYear());
     }
 }

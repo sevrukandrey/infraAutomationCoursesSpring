@@ -2,6 +2,8 @@ package com.playtika.automation.dao.entity;
 
 import com.playtika.automation.domain.AdvertStatus;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 
@@ -10,8 +12,10 @@ import static javax.persistence.EnumType.STRING;
 import static javax.persistence.GenerationType.AUTO;
 
 @Entity(name = "advert")
-@Data
+@Getter
+@Setter
 public class AdvertEntity {
+
     @Id
     @GeneratedValue(strategy = AUTO)
     private Long id;
@@ -22,11 +26,11 @@ public class AdvertEntity {
 
     @ManyToOne
     @JoinColumn(name = "seller_id")
-    private ClientEntity clientId;
+    private ClientEntity client;
 
     @ManyToOne()
     @JoinColumn(name = "deal_id")
-    private DealEntity dealId;
+    private DealEntity deal;
 
     private double price;
 

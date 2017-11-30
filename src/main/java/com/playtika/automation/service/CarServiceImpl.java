@@ -1,11 +1,16 @@
 package com.playtika.automation.service;
 
+import com.playtika.automation.dao.CarEntityRepo;
 import com.playtika.automation.dao.entity.*;
 import com.playtika.automation.domain.AdvertStatus;
 import com.playtika.automation.domain.Car;
 import com.playtika.automation.domain.CarSaleInfo;
 import com.playtika.automation.domain.SaleInfo;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
@@ -18,17 +23,45 @@ import java.util.function.Function;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.dao.support.DataAccessUtils.singleResult;
+import static org.springframework.data.domain.Sort.Direction.ASC;
 
 @Service
 @Transactional
 @AllArgsConstructor
 public class CarServiceImpl implements CarService {
 
-    @PersistenceContext
-    private final EntityManager manager;
+
+    private final CarEntityRepo carEntityRepo;
 
     @Override
     public long addCar(Car car, double price, String ownerContacts) {
+
+        carEntityRepo.save(new CarEntity());
+
+        CarEntity getCarById = carEntityRepo.findOne(5L);
+
+        carEntityRepo.delete(5L);
+
+        List<CarEntity>
+                carsByYear = carEntityRepo.findByYearAndBrandOrderByPlateNumber(2015, "asd",
+                new Sort(ASC,"year","plateNumber"));
+        Pageable pageable = new PageRequest(1, 20);
+
+
+        Page<CarEntity> pageCar = carEntityRepo.findByYearAndOwnerFirstName(2005, "asd", pageable);
+
+        carEntityRepo.findByYearAndOwnerFirstName(20005,"asd",pageable.next());
+
+
+
+
+
+
+
+
+
+
+
         CarEntity carEntity = getOrCreateCarEntity(car);
 
         ClientEntity clientEntity = getOrCreateClientEntity(ownerContacts);
@@ -40,21 +73,21 @@ public class CarServiceImpl implements CarService {
     @Override
     public List<CarSaleInfo> getAllCars() {
         List<AdvertEntity> resultList = manager.createQuery("SELECT a from advert a " +
-            "where a.status='OPEN'", AdvertEntity.class)
-            .getResultList();
+                "where a.status='OPEN'", AdvertEntity.class)
+                .getResultList();
 
         return resultList
-            .stream()
-            .map(this::toCarSaleInfo)
-            .collect(toList());
+                .stream()
+                .map(this::toCarSaleInfo)
+                .collect(toList());
     }
 
     @Override
     public void deleteCar(long carId) {
         List<AdvertEntity> resultList = manager.createQuery("select a from advert a join a.car c " +
-            "where c.id=:carId", AdvertEntity.class)
-            .setParameter("carId", carId)
-            .getResultList();
+                "where c.id=:carId", AdvertEntity.class)
+                .setParameter("carId", carId)
+                .getResultList();
 
         resultList.forEach(manager::remove);
     }
@@ -62,22 +95,27 @@ public class CarServiceImpl implements CarService {
     @Override
     public Optional<SaleInfo> getSaleInfo(long carId) {
         List<AdvertEntity> resultList = manager.createQuery("select a from advert a join a.car c " +
-            "where c.id=:carId AND a.status = 'OPEN'", AdvertEntity.class)
-            .setParameter("carId", carId)
-            .getResultList();
+                "where c.id=:carId AND a.status = 'OPEN'", AdvertEntity.class)
+                .setParameter("carId", carId)
+                .getResultList();
 
-        AdvertEntity advertEntity = singleResult(resultList);
+        return resultList.stream()
+                .findFirst()
+                .map(advert ->
+                        new SaleInfo(advert.getClient().getPhoneNumber(), advert.getPrice()));
 
-        return ofNullable(advertEntity).map(advert ->
-            new SaleInfo(advert.getClientId().getPhoneNumber(), advert.getPrice()));
+//        AdvertEntity advertEntity = singleResult(resultList);
+//
+//        return ofNullable(advertEntity).map(advert ->
+//            new SaleInfo(advert.getClient().getPhoneNumber(), advert.getPrice()));
 
     }
 
     private CarEntity getOrCreateCarEntity(Car car) {
         List<CarEntity> carEntities = manager.createQuery("select c from car c " +
-            "where c.plateNumber=:plateNumber", CarEntity.class)
-            .setParameter("plateNumber", car.getPlateNumber())
-            .getResultList();
+                "where c.plateNumber=:plateNumber", CarEntity.class)
+                .setParameter("plateNumber", car.getPlateNumber())
+                .getResultList();
 
         CarEntity carEntity = singleResult(carEntities);
         if (carEntity == null) {
@@ -90,7 +128,7 @@ public class CarServiceImpl implements CarService {
         AdvertEntity advertEntity = new AdvertEntity();
         advertEntity.setCar(carEntity);
         advertEntity.setPrice(price);
-        advertEntity.setClientId(clientEntity);
+        advertEntity.setClient(clientEntity);
         advertEntity.setStatus(AdvertStatus.OPEN);
 
         manager.persist(advertEntity);
@@ -100,10 +138,11 @@ public class CarServiceImpl implements CarService {
     private ClientEntity getOrCreateClientEntity(String ownerContacts) {
         List<ClientEntity> clientEntities = manager.createQuery("select c from client c " +
                 "where c.phoneNumber=:phoneNumber", ClientEntity.class)
-            .setParameter("phoneNumber", ownerContacts)
-            .getResultList();
+                .setParameter("phoneNumber", ownerContacts)
+                .getResultList();
 
-        ClientEntity clientEntity = singleResult(clientEntities);
+        ClientEntity clientEntity = singleResult(clientEntities); //getResultList.stream.findFerst --->Optional
+        //getResultList.isEmpty --- for check
         if (clientEntity == null) {
             clientEntity = saveClientAndGetClientEntity(ownerContacts);
         }
@@ -137,14 +176,14 @@ public class CarServiceImpl implements CarService {
     }
 
     private SaleInfo toSaleInfo(AdvertEntity advert) {
-        return new SaleInfo(advert.getClientId().getPhoneNumber(), advert.getPrice());
+        return new SaleInfo(advert.getClient().getPhoneNumber(), advert.getPrice());
     }
 
     private Car toCar(CarEntity carEntity) {
         return new Car(carEntity.getBrand(),
-            carEntity.getModel(),
-            carEntity.getPlateNumber(),
-            carEntity.getColor(),
-            carEntity.getYear());
+                carEntity.getModel(),
+                carEntity.getPlateNumber(),
+                carEntity.getColor(),
+                carEntity.getYear());
     }
 }

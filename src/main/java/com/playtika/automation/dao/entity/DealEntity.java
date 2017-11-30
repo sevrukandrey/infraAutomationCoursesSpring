@@ -2,6 +2,8 @@ package com.playtika.automation.dao.entity;
 
 import com.playtika.automation.domain.DealStatus;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 
@@ -9,7 +11,8 @@ import static javax.persistence.EnumType.*;
 import static javax.persistence.GenerationType.AUTO;
 
 @Entity(name = "deal")
-@Data
+@Getter
+@Setter
 public class DealEntity {
 
     @Id

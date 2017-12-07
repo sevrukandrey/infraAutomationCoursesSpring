@@ -76,6 +76,14 @@
             <groupId>com.github.database-rider</groupId>
             <artifactId>rider-core</artifactId>
             <version>1.2.5</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>2.3.4</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

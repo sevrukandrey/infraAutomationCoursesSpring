@@ -1,0 +1,8 @@
+<dataset>
+    <advert  id = "1" price="200" status="OPEN" car_id = "1" seller_id = "1" deal_id = "1"/>
+    <advert  id = "2" price="100" status="CLOSED" car_id = "1" seller_id = "1" deal_id = "1"/>
+
+    <car id="1" year = "2012" plate_number = "12-12" color ="green" model = "x5" brand="bmw"/>
+    <client id="1" name="andrey" surname="sevruk" phone_number="0937746730"/>
+    <deal id="1" buyer_id="1" advert_id="1" price="200"/>
+</dataset>

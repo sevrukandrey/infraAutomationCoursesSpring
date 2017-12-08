@@ -1,9 +1,9 @@
 package com.playtika.automation.dao.entity;
 
 import com.playtika.automation.domain.AdvertStatus;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 
@@ -14,6 +14,7 @@ import static javax.persistence.GenerationType.AUTO;
 @Entity(name = "advert")
 @Getter
 @Setter
+@ToString
 public class AdvertEntity {
     @Id
     @GeneratedValue(strategy = AUTO)

@@ -40,7 +40,6 @@ public class CarsControllerIntegrationTest {
 
     @Test
     public void shouldAddCar() throws Exception {
-
         when(carService.addCar(constructCar(), 1000, "Andrey")).thenReturn(1L);
 
         String contentAsString = mockMvc.perform(post("/cars")
@@ -62,7 +61,6 @@ public class CarsControllerIntegrationTest {
 
     @Test
     public void shouldGetAllCars() throws Exception {
-
         when(carService.getAllCars()).thenReturn(singletonList(constructCarsForSale()));
 
         mockMvc.perform(get("/cars")
@@ -80,7 +78,6 @@ public class CarsControllerIntegrationTest {
 
     @Test
     public void shouldSuccessfullyResponseIfGetAllCarsEmpty() throws Exception {
-
         when(carService.getAllCars()).thenReturn(new ArrayList<>());
 
         mockMvc.perform(get("/cars")
@@ -104,7 +101,7 @@ public class CarsControllerIntegrationTest {
 
     @Test
     public void shouldReturnCarSaleInfo() throws Exception {
-        SaleInfo carInfo = new SaleInfo("Andrey",1000.0);
+        SaleInfo carInfo = new SaleInfo("Andrey", 1000.0);
 
         when(carService.getSaleInfo(1L)).thenReturn(of(carInfo));
 

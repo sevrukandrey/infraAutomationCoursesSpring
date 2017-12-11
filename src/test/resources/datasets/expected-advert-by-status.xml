@@ -1,0 +1,5 @@
+
+<dataset>
+<advert  id = "1" price="200" status="OPEN" />
+<advert  id = "2" price="100" status="CLOSED"/>
+</dataset>

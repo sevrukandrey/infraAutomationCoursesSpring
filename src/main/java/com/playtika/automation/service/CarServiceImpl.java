@@ -24,8 +24,6 @@ import static java.util.stream.Collectors.toList;
 @AllArgsConstructor
 public class CarServiceImpl implements CarService {
 
-//    @PersistenceContext
-//    private final EntityManager entityManager;
 
     private CarEntityRepository carEntityRepository;
     private ClientEntityRepository clientEntityRepository;
@@ -38,6 +36,8 @@ public class CarServiceImpl implements CarService {
         ClientEntity clientEntity = getOrCreateClientEntity(ownerContacts);
 
         AdvertEntity advertEntity = persistAdvertEntity(price, carEntity, clientEntity);
+
+
         return advertEntity.getCar().getId();
     }
 
@@ -47,22 +47,11 @@ public class CarServiceImpl implements CarService {
             .stream()
             .map(this::toCarSaleInfo)
             .collect(toList());
-
-
-        //        return entityManager.createQuery("SELECT a from advert a " +
-//            "where a.status='OPEN'", AdvertEntity.class)
-//            .getResultList().stream()
-//            .map(this::toCarSaleInfo)
-//            .collect(toList());
     }
 
     @Override
     public void deleteCar(long carId) {
-//        entityManager.createQuery("delete from advert a where a.car.id=:carId ")
-//            .setParameter("carId", carId)
-//            .executeUpdate();
-//
-//
+
         advertEntityRepository.deleteByCarId(carId);
     }
 
@@ -71,15 +60,6 @@ public class CarServiceImpl implements CarService {
         return advertEntityRepository.findByCarIdAndStatus(carId, AdvertStatus.OPEN).stream()
             .findFirst()
             .map(this::toSaleInfo);
-
-//
-//        return entityManager.createQuery("select a from advert a join a.car c " +
-//            "where c.id=:carId AND a.status = 'OPEN'", AdvertEntity.class)
-//            .setParameter("carId", carId)
-//            .getResultList()
-//            .stream()
-//            .findFirst()
-//            .map(this::toSaleInfo);
     }
 
     private CarEntity getOrCreateCarEntity(Car car) {
@@ -87,14 +67,6 @@ public class CarServiceImpl implements CarService {
             .stream()
             .findFirst()
             .orElseGet(() -> saveCarAndGetCarEntity(car));
-
-//        return entityManager.createQuery("select c from car c " +
-//                "where c.plateNumber=:plateNumber", CarEntity.class)
-//                .setParameter("plateNumber", car.getPlateNumber())
-//                .getResultList()
-//                .stream()
-//                .findFirst()
-//                .orElseGet(() -> saveCarAndGetCarEntity(car));
     }
 
     private AdvertEntity persistAdvertEntity(double price, CarEntity carEntity, ClientEntity clientEntity) {
@@ -104,24 +76,14 @@ public class CarServiceImpl implements CarService {
         advertEntity.setClient(clientEntity);
         advertEntity.setStatus(AdvertStatus.OPEN);
         advertEntityRepository.save(advertEntity);
-        //entityManager.persist(advertEntity);
         return advertEntity;
     }
 
     private ClientEntity getOrCreateClientEntity(String ownerContacts) {
-
         return clientEntityRepository.findByPhoneNumber(ownerContacts)
             .stream()
             .findFirst()
             .orElseGet(() -> saveClientAndGetClientEntity(ownerContacts));
-
-//        return entityManager.createQuery("select c from client c " +
-//                "where c.phoneNumber=:phoneNumber", ClientEntity.class)
-//                .setParameter("phoneNumber", ownerContacts)
-//                .getResultList()
-//                .stream()
-//                .findFirst()
-//                .orElseGet(() -> saveClientAndGetClientEntity(ownerContacts));
     }
 
     private ClientEntity saveClientAndGetClientEntity(String ownerContacts) {
@@ -129,8 +91,6 @@ public class CarServiceImpl implements CarService {
         clientEntity.setPhoneNumber(ownerContacts);
 
         clientEntityRepository.save(clientEntity);
-
-//        entityManager.persist(clientEntity);
 
         return clientEntity;
     }
@@ -142,8 +102,6 @@ public class CarServiceImpl implements CarService {
         carEntity.setBrand(car.getBrand());
         carEntity.setPlateNumber(car.getPlateNumber());
         carEntity.setYear(car.getYear());
-
-//        entityManager.persist(carEntity);
         carEntityRepository.save(carEntity);
         return carEntity;
     }

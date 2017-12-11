@@ -1,0 +1,4 @@
+<dataset>
+<car id="1" year="2012" plate_number="12-12" color="green" model="x5" brand="bmw"/>
+<car id="2" year="2013" plate_number="12-13" color="green" model="x6" brand="bmw"/>
+</dataset>

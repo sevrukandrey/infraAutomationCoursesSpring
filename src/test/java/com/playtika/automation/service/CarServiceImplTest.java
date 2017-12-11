@@ -99,22 +99,39 @@ public class CarServiceImplTest {
     @Test
     public void shouldAddCar() {
         CarEntity carEntity = constructCarEntity();
-        CarEntity newCarEntity = constructCarEntity();
-        newCarEntity.setId(1L);
-
+        CarEntity savedCarEntity = constructSavedCarEntity();
         ClientEntity clientEntity = constructClientEntity();
+        ClientEntity savedClientEntity = constructSavedClientEntity();
+        AdvertEntity advertEntity = constructAdvert(savedCarEntity, savedClientEntity);
 
-        AdvertEntity advertEntity = constructAdvert(newCarEntity, constructClientEntity());
-        when(carEntityRepository.save(any(CarEntity.class))).thenReturn(newCarEntity);
-        when(clientEntityRepository.save(clientEntity)).thenReturn(clientEntity);
-        when(advertEntityRepository.save(advertEntity)).thenReturn(advertEntity);
+
+        when(carEntityRepository.save(any(CarEntity.class))).thenReturn(savedCarEntity);
+        when(clientEntityRepository.save(any(ClientEntity.class))).thenReturn(savedClientEntity);
+        when(advertEntityRepository.save(any(AdvertEntity.class))).thenReturn(advertEntity);
 
         when(carEntityRepository.findByPlateNumber(car.getPlateNumber())).thenReturn(Collections.emptyList());
         when(clientEntityRepository.findByPhoneNumber(owner)).thenReturn(Collections.emptyList());
 
-        carService.addCar(car, price, owner);
+        long id = carService.addCar(car, price, owner);
+        assertThat(id).isEqualTo(1L);
+    }
 
-        verify(advertEntityRepository).save(any(AdvertEntity.class));
+    private ClientEntity constructSavedClientEntity() {
+        ClientEntity clientEntity = new ClientEntity();
+        clientEntity.setPhoneNumber(owner);
+        clientEntity.setId(2L);
+        return clientEntity;
+    }
+
+    private CarEntity constructSavedCarEntity() {
+        CarEntity carEntity = new CarEntity();
+        carEntity.setId(1L);
+        carEntity.setColor(car.getColor());
+        carEntity.setPlateNumber(car.getPlateNumber());
+        carEntity.setBrand(car.getBrand());
+        carEntity.setYear(car.getYear());
+        carEntity.setModel(car.getModel());
+        return carEntity;
     }
 
 
@@ -127,6 +144,7 @@ public class CarServiceImplTest {
         List<CarEntity> carEntities = new ArrayList<>();
         carEntities.add(carEntity);
         clientEntities.add(clientEntity);
+
 
         AdvertEntity advertEntity = new AdvertEntity();
         CarEntity  carEn = constructCarEntity();

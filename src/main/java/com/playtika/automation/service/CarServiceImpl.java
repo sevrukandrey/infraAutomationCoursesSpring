@@ -75,8 +75,7 @@ public class CarServiceImpl implements CarService {
         advertEntity.setPrice(price);
         advertEntity.setClient(clientEntity);
         advertEntity.setStatus(AdvertStatus.OPEN);
-        advertEntityRepository.save(advertEntity);
-        return advertEntity;
+        return advertEntityRepository.save(advertEntity);
     }
 
     private ClientEntity getOrCreateClientEntity(String ownerContacts) {
@@ -90,9 +89,7 @@ public class CarServiceImpl implements CarService {
         ClientEntity clientEntity = new ClientEntity();
         clientEntity.setPhoneNumber(ownerContacts);
 
-        clientEntityRepository.save(clientEntity);
-
-        return clientEntity;
+        return clientEntityRepository.save(clientEntity);
     }
 
     private CarEntity saveCarAndGetCarEntity(Car car) {
@@ -102,8 +99,7 @@ public class CarServiceImpl implements CarService {
         carEntity.setBrand(car.getBrand());
         carEntity.setPlateNumber(car.getPlateNumber());
         carEntity.setYear(car.getYear());
-        carEntityRepository.save(carEntity);
-        return carEntity;
+        return carEntityRepository.save(carEntity);
     }
 
     private CarSaleInfo toCarSaleInfo(AdvertEntity advert) {

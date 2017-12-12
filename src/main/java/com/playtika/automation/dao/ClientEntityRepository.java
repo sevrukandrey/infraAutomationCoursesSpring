@@ -1,10 +1,12 @@
 package com.playtika.automation.dao;
 
 import com.playtika.automation.dao.entity.ClientEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.NoRepositoryBean;
 
 import java.util.List;
 
-public interface ClientEntityRepository extends JpaRepository<ClientEntity, Long> {
+@NoRepositoryBean
+public interface ClientEntityRepository extends CrudRepository {
     List<ClientEntity> findByPhoneNumber(String ownerContacts);
 }

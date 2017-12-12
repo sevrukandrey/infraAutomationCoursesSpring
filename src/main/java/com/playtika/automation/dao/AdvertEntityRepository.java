@@ -2,11 +2,13 @@ package com.playtika.automation.dao;
 
 import com.playtika.automation.dao.entity.AdvertEntity;
 import com.playtika.automation.domain.AdvertStatus;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.NoRepositoryBean;
 
 import java.util.List;
 
-public interface AdvertEntityRepository extends JpaRepository<AdvertEntity, Long> {
+@NoRepositoryBean
+public interface AdvertEntityRepository extends CrudRepository {
     List<AdvertEntity>  findByStatus(AdvertStatus status);
 
     List<AdvertEntity> findByCarIdAndStatus(long carId, AdvertStatus status);

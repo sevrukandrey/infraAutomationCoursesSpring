@@ -3,16 +3,11 @@ package com.playtika.automation.dao.entity;
 import com.couchbase.client.java.repository.annotation.Field;
 import org.springframework.data.couchbase.core.mapping.Document;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-
 @Document
 public class CarCouch {
 
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @com.couchbase.client.java.repository.annotation.Id
     private Long id;
     @Field
     private String plateNumber;

@@ -1,6 +1,7 @@
 package com.playtika.automation.dao.entity;
 
 import com.couchbase.client.java.repository.annotation.Field;
+import com.couchbase.client.java.repository.annotation.Id;
 import com.playtika.automation.domain.AdvertStatus;
 import lombok.*;
 import org.springframework.data.couchbase.core.mapping.Document;

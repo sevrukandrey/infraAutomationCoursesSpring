@@ -3,6 +3,7 @@ package com.playtika.automation.dao.entity;
 import com.playtika.automation.domain.DealStatus;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.couchbase.core.mapping.Document;
 
 import javax.persistence.*;
 
@@ -12,11 +13,12 @@ import static javax.persistence.GenerationType.AUTO;
 @Entity(name = "deal")
 @Getter
 @Setter
+@Document
 public class DealEntity {
 
-    @Id
-    @GeneratedValue(strategy = AUTO)
-    private Long id;
+
+    @com.couchbase.client.java.repository.annotation.Id
+    private String id;
     @ManyToOne
     @JoinColumn(name = "buyer_id")
     private ClientEntity buyer;
@@ -26,4 +28,15 @@ public class DealEntity {
     private AdvertEntity advert;
     @Enumerated(STRING)
     private DealStatus status;
+
+
+    @javax.persistence.Id
+    @GeneratedValue(strategy = AUTO)
+    public Long getId() {
+        return Long.valueOf(id);
+    }
+
+    public void setId(Long id) {
+        this.id = id.toString();
+    }
 }

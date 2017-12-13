@@ -1,10 +1,11 @@
 package com.playtika.automation.dao.entity;
 
+import com.couchbase.client.java.repository.annotation.Field;
 import lombok.*;
+import org.springframework.data.couchbase.core.mapping.Document;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 
 import static javax.persistence.GenerationType.AUTO;
 
@@ -14,19 +15,26 @@ import static javax.persistence.GenerationType.AUTO;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@Document
 public class ClientEntity {
 
-    @Id
-    @GeneratedValue(strategy = AUTO)
-    private long id;
+    @com.couchbase.client.java.repository.annotation.Id
+    private String id;
+    @Field
     private String name;
-
+    @Field
     private String surname;
+    @Field
     private String phoneNumber;
 
-    public ClientEntity(String name, String surname, String phoneNumber) {
-        this.name = name;
-        this.surname = surname;
-        this.phoneNumber = phoneNumber;
+
+    @javax.persistence.Id
+    @GeneratedValue(strategy = AUTO)
+    public Long getId() {
+        return Long.valueOf(id);
+    }
+
+    public void setId(Long id) {
+        this.id = id.toString();
     }
 }

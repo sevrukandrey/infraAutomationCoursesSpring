@@ -10,7 +10,7 @@ import com.playtika.automation.domain.AdvertStatus;
 import com.playtika.automation.domain.Car;
 import com.playtika.automation.domain.CarSaleInfo;
 import com.playtika.automation.domain.SaleInfo;
-import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -20,12 +20,19 @@ import java.util.Optional;
 import static java.util.stream.Collectors.toList;
 
 @Service
-@AllArgsConstructor
 public class CarServiceImpl implements CarService {
 
-    private CarEntityRepository carEntityRepository;
-    private ClientEntityRepository clientEntityRepository;
-    private AdvertEntityRepository advertEntityRepository;
+    private final CarEntityRepository carEntityRepository;
+    private final ClientEntityRepository clientEntityRepository;
+    private final AdvertEntityRepository advertEntityRepository;
+
+    public CarServiceImpl(@Qualifier("jpaCarEntityRepository") CarEntityRepository carEntityRepository,
+                          @Qualifier("jpaClientEntityRepository") ClientEntityRepository clientEntityRepository,
+                          @Qualifier("jpaAdvertEntityRepository") AdvertEntityRepository advertEntityRepository) {
+        this.carEntityRepository = carEntityRepository;
+        this.clientEntityRepository = clientEntityRepository;
+        this.advertEntityRepository = advertEntityRepository;
+    }
 
     @Transactional
     @Override

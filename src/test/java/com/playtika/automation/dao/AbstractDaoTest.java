@@ -7,6 +7,7 @@ import com.playtika.automation.dao.entity.ClientEntity;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -14,19 +15,22 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DBUnit
-public class AbstractDaoTest {
+public abstract class AbstractDaoTest {
     @Autowired
     protected JdbcTemplate jdbcTemplate;
 
     @Rule
     public DBUnitRule dbUnitRule = DBUnitRule.instance(() -> jdbcTemplate.getDataSource().getConnection());
 
+    @Qualifier("jpaAdvertEntityRepository")
     @Autowired
     protected AdvertEntityRepository advertDao;
 
+    @Qualifier("jpaCarEntityRepository")
     @Autowired
     protected CarEntityRepository carDao;
 
+    @Qualifier("jpaClientEntityRepository")
     @Autowired
     protected ClientEntityRepository clientDao;
 

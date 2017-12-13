@@ -5,6 +5,7 @@ import com.github.database.rider.core.api.dataset.ExpectedDataSet;
 import com.playtika.automation.dao.entity.AdvertEntity;
 import com.playtika.automation.dao.entity.CarEntity;
 import com.playtika.automation.domain.AdvertStatus;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.springframework.test.annotation.Commit;
 
@@ -47,7 +48,9 @@ public class AdvertRepositoryTest extends AbstractDaoTest {
     public void shouldDeleteByCarId() {
         advertDao.deleteByCarId(1L);
 
-        assertThat(advertDao.findAll(), hasSize(0));
+        Iterable<AdvertEntity> all = advertDao.findAll();
+
+        Assertions.assertThat(all).isEmpty();
     }
 
     @Test

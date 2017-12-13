@@ -13,6 +13,7 @@ import com.playtika.automation.domain.SaleInfo;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,7 @@ public class CarServiceImpl implements CarService {
     private ClientEntityRepository clientEntityRepository;
     private AdvertEntityRepository advertEntityRepository;
 
+    @Transactional
     @Override
     public long addCar(Car car, double price, String ownerContacts) {
         CarEntity carEntity = getOrCreateCarEntity(car);

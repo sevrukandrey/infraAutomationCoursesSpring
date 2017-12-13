@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -37,7 +38,7 @@ public class CarControllerSystemTest {
                 .contentType(APPLICATION_JSON_UTF8_VALUE)
                 .content("{\"brand\": \"Ford\",\"model\":\"fiesta\"}")
                 .param("price", "1000")
-                .param("ownerContacts", "Amdre"))
+                .param("ownerContacts", "Andrey"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
                 .andReturn()
@@ -68,25 +69,17 @@ public class CarControllerSystemTest {
 
     @Test
     public void shouldDeleteCarById() throws Exception {
-        mockMvc.perform(post("/cars")
-                .contentType(APPLICATION_JSON_UTF8_VALUE)
-                .content("{\"brand\": \"Ford\",\"model\":\"fiesta\"}")
-                .param("price", "1000")
-                .param("ownerContacts", "Amdre"))
-                .andExpect(status().isOk());
+        String id = mockMvc.perform(post("/cars")
+            .contentType(APPLICATION_JSON_UTF8_VALUE)
+            .content("{\"brand\": \"Ford\",\"model\":\"fiesta\"}")
+            .param("price", "1000")
+            .param("ownerContacts", "Andrey"))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
 
-        mockMvc.perform(delete("/cars/1")
+        mockMvc.perform(delete("/cars/"+ id)
                 .contentType(APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(status().isOk());
-
-        String result = mockMvc.perform(get("/cars")
-                .contentType(APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        assertThat(result).isEqualTo("[]");
     }
 
     @Test

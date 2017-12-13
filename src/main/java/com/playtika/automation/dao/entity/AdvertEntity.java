@@ -40,6 +40,7 @@ public class AdvertEntity {
     private AdvertStatus status;
 
 
+
     public AdvertEntity(CarEntity car, ClientEntity client, DealEntity deal, double price, AdvertStatus status) {
         this.car = car;
         this.client = client;

@@ -13,17 +13,14 @@ import com.playtika.automation.domain.SaleInfo;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
 @Service
-@Transactional
 @AllArgsConstructor
 public class CarServiceImpl implements CarService {
-
 
     private CarEntityRepository carEntityRepository;
     private ClientEntityRepository clientEntityRepository;
@@ -51,13 +48,13 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public void deleteCar(long carId) {
-
         advertEntityRepository.deleteByCarId(carId);
     }
 
     @Override
     public Optional<SaleInfo> getSaleInfo(long carId) {
-        return advertEntityRepository.findByCarIdAndStatus(carId, AdvertStatus.OPEN).stream()
+        return advertEntityRepository.findByCarIdAndStatus(carId, AdvertStatus.OPEN)
+            .stream()
             .findFirst()
             .map(this::toSaleInfo);
     }

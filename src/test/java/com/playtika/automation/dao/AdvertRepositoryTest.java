@@ -14,7 +14,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
 
-public class AdvertRepositoryTest extends AbstractDao<AdvertEntityRepository> {
+public class AdvertRepositoryTest extends AbstractDaoTest {
+
     @Test
     @DataSet(value = "expected-advert-by-status.xml",
             useSequenceFiltering = false,

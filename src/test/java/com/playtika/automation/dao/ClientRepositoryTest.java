@@ -12,7 +12,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
 
-public class ClientRepositoryTest extends AbstractDao<ClientEntityRepository> {
+public class ClientRepositoryTest extends AbstractDaoTest {
 
     @Test
     @DataSet(value = "find-by-phone-number.xml",

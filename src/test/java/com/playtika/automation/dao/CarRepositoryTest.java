@@ -12,7 +12,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
 
-public class CarRepositoryTest extends AbstractDao<CarEntityRepository> {
+public class CarRepositoryTest extends AbstractDaoTest {
+
     @Test
     @DataSet(
             value = "find-by-plate-number.xml",

@@ -1,6 +1,5 @@
 package com.playtika.automation.dao.entity;
 
-import com.couchbase.client.java.repository.annotation.Field;
 import com.playtika.automation.domain.AdvertStatus;
 import lombok.*;
 import org.springframework.data.couchbase.core.mapping.Document;
@@ -20,12 +19,14 @@ import static javax.persistence.GenerationType.AUTO;
 @Document
 public class AdvertEntity {
 
-    @com.couchbase.client.java.repository.annotation.Id
-    private String id;
+   // @com.couchbase.client.java.repository.annotation.Id
+   @Id
+   @GeneratedValue(strategy = AUTO)
+    private Long id;
 
     @ManyToOne(cascade = REMOVE)
     @JoinColumn(name = "car_id")
-    @Field
+    //@Field
     private CarEntity car;
 
     @ManyToOne
@@ -36,21 +37,21 @@ public class AdvertEntity {
     @JoinColumn(name = "deal_id")
     private DealEntity deal;
 
-    @Field
+    //@Field
     private double price;
 
     @Enumerated(STRING)
-    @Field
+    //@Field
     private AdvertStatus status;
 
-    @Id
-    @GeneratedValue(strategy = AUTO)
-    public Long getId() {
-        return Long.valueOf(id);
-    }
-
-    public void setId(Long id) {
-        this.id = id.toString();
-    }
+//    @Id
+//    @GeneratedValue(strategy = AUTO)
+//    public Long getId() {
+//        return Long.valueOf(id);
+//    }
+//
+//    public void setId(Long id) {
+//        this.id = id.toString();
+//    }
 
 }

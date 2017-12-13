@@ -8,31 +8,34 @@ import org.springframework.test.annotation.Commit;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.samePropertyValuesAs;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CarRepositoryTest extends AbstractDaoTest {
 
     @Test
     @DataSet(
-            value = "find-by-plate-number.xml",
-            useSequenceFiltering = false,
-            disableConstraints = true)
+        value = "find-by-plate-number.xml",
+        useSequenceFiltering = false,
+        disableConstraints = true)
     public void shouldFindByPlateNumber() {
         CarEntity carEntity = constructCarEntity();
 
         List<CarEntity> byPlateNumber = carDao.findByPlateNumber("12-12");
 
-        assertThat(byPlateNumber, hasSize(1));
-        assertThat(byPlateNumber.get(0), samePropertyValuesAs(carEntity));
+        assertThat(byPlateNumber).hasSize(1);
+        assertThat(byPlateNumber.get(0).getId()).isEqualTo(carEntity.getId());
+        assertThat(byPlateNumber.get(0).getPlateNumber()).isEqualTo(carEntity.getPlateNumber());
+        assertThat(byPlateNumber.get(0).getBrand()).isEqualTo(carEntity.getBrand());
+        assertThat(byPlateNumber.get(0).getColor()).isEqualTo(carEntity.getColor());
+        assertThat(byPlateNumber.get(0).getModel()).isEqualTo(carEntity.getModel());
+
     }
 
     @Test
     @DataSet(
-            value = "empty-car.xml",
-            useSequenceFiltering = false,
-            disableConstraints = true)
+        value = "empty-car.xml",
+        useSequenceFiltering = false,
+        disableConstraints = true)
     @ExpectedDataSet("add-car.xml")
     @Commit
     public void shouldSaveCar() {

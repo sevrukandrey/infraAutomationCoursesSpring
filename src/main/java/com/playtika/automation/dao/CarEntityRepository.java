@@ -6,7 +6,7 @@ import org.springframework.data.repository.NoRepositoryBean;
 
 import java.util.List;
 
-@NoRepositoryBean
+
 public interface CarEntityRepository extends JpaRepository<CarEntity, Long> {
     List<CarEntity> findByPlateNumber(String plateNumber);
 }

@@ -16,10 +16,6 @@ import static javax.persistence.GenerationType.AUTO;
 @Document
 public class DealEntity {
 
-
-
-
- // @com.couchbase.client.java.repository.annotation.Id
     @Id
     @GeneratedValue(strategy = AUTO)
     private Long id;
@@ -33,19 +29,11 @@ public class DealEntity {
     @Enumerated(STRING)
     private DealStatus status;
 
- public DealEntity(ClientEntity buyer, double price, AdvertEntity advert, DealStatus status) {
-  this.buyer = buyer;
-  this.price = price;
-  this.advert = advert;
-  this.status = status;
- }
-//    @javax.persistence.Id
-//    @GeneratedValue(strategy = AUTO)
-//    public Long getId() {
-//        return Long.valueOf(id);
-//    }
-//
-//    public void setId(Long id) {
-//        this.id = id.toString();
-//    }
+    public DealEntity(ClientEntity buyer, double price, AdvertEntity advert, DealStatus status) {
+        this.buyer = buyer;
+        this.price = price;
+        this.advert = advert;
+        this.status = status;
+    }
+
 }

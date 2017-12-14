@@ -10,7 +10,6 @@ import com.playtika.automation.domain.AdvertStatus;
 import com.playtika.automation.domain.Car;
 import com.playtika.automation.domain.CarSaleInfo;
 import com.playtika.automation.domain.SaleInfo;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -22,13 +21,11 @@ import static java.util.stream.Collectors.toList;
 @Service
 public class CarServiceImpl implements CarService {
 
-    private final CarEntityRepository carEntityRepository;
-    private final ClientEntityRepository clientEntityRepository;
-    private final AdvertEntityRepository advertEntityRepository;
+    private CarEntityRepository carEntityRepository;
+    private ClientEntityRepository clientEntityRepository;
+    private AdvertEntityRepository advertEntityRepository;
 
-    public CarServiceImpl(@Qualifier("jpaCarEntityRepository") CarEntityRepository carEntityRepository,
-                          @Qualifier("jpaClientEntityRepository") ClientEntityRepository clientEntityRepository,
-                          @Qualifier("jpaAdvertEntityRepository") AdvertEntityRepository advertEntityRepository) {
+    public CarServiceImpl(CarEntityRepository carEntityRepository, ClientEntityRepository clientEntityRepository, AdvertEntityRepository advertEntityRepository) {
         this.carEntityRepository = carEntityRepository;
         this.clientEntityRepository = clientEntityRepository;
         this.advertEntityRepository = advertEntityRepository;

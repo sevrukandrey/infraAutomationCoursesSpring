@@ -8,16 +8,14 @@ import com.playtika.automation.dao.entity.ClientEntity;
 import com.playtika.automation.domain.AdvertStatus;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.Commit;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AdvertRepositoryTest extends AbstractDaoTest{
+public class AdvertRepositoryTest extends AbstractDaoTest {
 
-    @Qualifier("jpaAdvertEntityRepository")
     @Autowired
     AdvertEntityRepository dao;
 
@@ -26,9 +24,18 @@ public class AdvertRepositoryTest extends AbstractDaoTest{
         useSequenceFiltering = false,
         disableConstraints = true)
     public void shouldFindAdvertByStatus() {
+
+        CarEntity carEntity = new CarEntity("12-12", 2012, "green", "x5", "bmw");
+        carEntity.setId(1L);
+        ClientEntity clientEntity = new ClientEntity("andrey", "sevruk", "0937746730");
+        clientEntity.setId(2L);
+
         List<AdvertEntity> findByStatus = dao.findByStatus(AdvertStatus.OPEN);
 
         assertThat(findByStatus).hasSize(1);
+
+        assertThat(findByStatus.get(0).getId()).isEqualTo(1L);
+        assertThat(findByStatus.get(0).getPrice()).isEqualTo(200);
     }
 
     @Test
@@ -49,7 +56,11 @@ public class AdvertRepositoryTest extends AbstractDaoTest{
         List<AdvertEntity> resultsAdvert = dao.findByCarIdAndStatus(1L, AdvertStatus.OPEN);
 
         assertThat(resultsAdvert).hasSize(1);
-        assertAdvertEntitiesAreEqual(resultsAdvert.get(0), expectedAdvert);
+        assertThat(resultsAdvert.get(0).getId()).isEqualTo(1L);
+        assertThat(resultsAdvert.get(0).getClient()).isEqualToComparingFieldByField(clientEntity);
+        assertThat(resultsAdvert.get(0).getCar()).isEqualToComparingFieldByField(carEntity);
+        assertThat(resultsAdvert.get(0).getStatus()).isEqualTo(AdvertStatus.OPEN);
+
     }
 
     @Test
@@ -61,6 +72,7 @@ public class AdvertRepositoryTest extends AbstractDaoTest{
     public void shouldDeleteByCarId() {
         dao.deleteByCarId(1);
 
+        assertThat(dao.count()).isZero();
     }
 
     @Test
@@ -73,11 +85,21 @@ public class AdvertRepositoryTest extends AbstractDaoTest{
         CarEntity carEntity = new CarEntity("12-12", 2012, "green", "x5", "bmw");
         carEntity.setId(1L);
         ClientEntity clientEntity = new ClientEntity("andrey", "sevruk", "0937746730");
-        clientEntity.setId(2l);
+        clientEntity.setId(2L);
 
         AdvertEntity advertEntity = new AdvertEntity(carEntity, clientEntity, null, 100, AdvertStatus.OPEN);
 
         dao.save(advertEntity);
+    }
+
+    @Test
+    public void shouldReturnEmptyListIfAdvertByStatusNotFound(){
+
+    }
+
+    @Test
+    public void shouldReturnEmptyListIfAdvertByStatusAndCarNotFound(){
+
     }
 
     private CarEntity constructCarEntity() {

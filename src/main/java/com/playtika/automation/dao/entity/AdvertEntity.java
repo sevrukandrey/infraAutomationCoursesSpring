@@ -18,14 +18,12 @@ import static javax.persistence.GenerationType.AUTO;
 @Document
 public class AdvertEntity {
 
-   // @com.couchbase.client.java.repository.annotation.Id
-   @Id
-   @GeneratedValue(strategy = AUTO)
+    @Id
+    @GeneratedValue(strategy = AUTO)
     private Long id;
 
- @ManyToOne(cascade = REMOVE)
+    @ManyToOne(cascade = REMOVE)
     @JoinColumn(name = "car_id")
-    //@Field
     private CarEntity car;
 
     @ManyToOne
@@ -36,29 +34,17 @@ public class AdvertEntity {
     @JoinColumn(name = "deal_id")
     private DealEntity deal;
 
-    //@Field
     private double price;
 
     @Enumerated(STRING)
-    //@Field
     private AdvertStatus status;
 
- public AdvertEntity(CarEntity car, ClientEntity client, DealEntity deal, double price, AdvertStatus status) {
-  this.car = car;
-  this.client = client;
-  this.deal = deal;
-  this.price = price;
-  this.status = status;
- }
-
-//    @Id
-//    @GeneratedValue(strategy = AUTO)
-//    public Long getId() {
-//        return Long.valueOf(id);
-//    }
-//
-//    public void setId(Long id) {
-//        this.id = id.toString();
-//    }
+    public AdvertEntity(CarEntity car, ClientEntity client, DealEntity deal, double price, AdvertStatus status) {
+        this.car = car;
+        this.client = client;
+        this.deal = deal;
+        this.price = price;
+        this.status = status;
+    }
 
 }

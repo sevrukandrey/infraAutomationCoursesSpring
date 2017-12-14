@@ -4,6 +4,7 @@ import com.github.database.rider.core.api.dataset.DataSet;
 import com.github.database.rider.core.api.dataset.ExpectedDataSet;
 import com.playtika.automation.dao.entity.AdvertEntity;
 import com.playtika.automation.dao.entity.CarEntity;
+import com.playtika.automation.dao.entity.ClientEntity;
 import com.playtika.automation.domain.AdvertStatus;
 import org.junit.Test;
 import org.springframework.test.annotation.Commit;
@@ -13,7 +14,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class AdvertRepositoryTest extends AbstractDaoTest {
-
     @Test
     @DataSet(value = "expected-advert-by-status.xml",
         useSequenceFiltering = false,
@@ -31,13 +31,13 @@ public class AdvertRepositoryTest extends AbstractDaoTest {
         disableConstraints = true)
     public void shouldFindAdvertByCarIdAndStatus() {
         CarEntity carEntity = constructCarEntity();
+        ClientEntity clientEntity = constructClientEntity();
+        AdvertEntity expectedAdvert = constructAdvertEntity(carEntity, clientEntity);
 
-        List<AdvertEntity> findByCarIdAndStatus = advertDao.findByCarIdAndStatus(1, AdvertStatus.OPEN);
+        List<AdvertEntity> resultsAdvert = advertDao.findByCarIdAndStatus(1L, AdvertStatus.OPEN);
 
-        assertThat(findByCarIdAndStatus).hasSize(1);
-        assertThat(findByCarIdAndStatus.get(0).getCar().getPlateNumber()).isEqualTo(carEntity.getPlateNumber());
-        assertThat(findByCarIdAndStatus.get(0).getCar().getBrand()).isEqualTo(carEntity.getBrand());
-        assertThat(findByCarIdAndStatus.get(0).getCar().getId()).isEqualTo(carEntity.getId());
+        assertThat(resultsAdvert).hasSize(1);
+        assertAdvertEntitiesAreEqual(resultsAdvert.get(0), expectedAdvert);
     }
 
     @Test
@@ -47,7 +47,7 @@ public class AdvertRepositoryTest extends AbstractDaoTest {
     public void shouldDeleteByCarId() {
         advertDao.deleteByCarId(1L);
 
-        assertThat(advertDao.findAll()).isEmpty();
+        assertThat(advertDao.findOne(1L)).isNull();
     }
 
     @Test

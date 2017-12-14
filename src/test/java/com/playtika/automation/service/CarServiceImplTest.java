@@ -6,7 +6,6 @@ import com.playtika.automation.dao.ClientEntityRepository;
 import com.playtika.automation.dao.entity.AdvertEntity;
 import com.playtika.automation.dao.entity.CarEntity;
 import com.playtika.automation.dao.entity.ClientEntity;
-import com.playtika.automation.domain.AdvertStatus;
 import com.playtika.automation.domain.Car;
 import com.playtika.automation.domain.CarSaleInfo;
 import com.playtika.automation.domain.SaleInfo;
@@ -16,10 +15,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
+import static com.playtika.automation.domain.AdvertStatus.OPEN;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,6 +31,8 @@ public class CarServiceImplTest {
     private double price = 1000.0;
     private String owner = "093";
     private long carId = 1L;
+    private long clientId = 2L;
+    private long advertId = 3L;
     private Car car;
     private SaleInfo saleInfo;
 
@@ -56,22 +57,21 @@ public class CarServiceImplTest {
     @Test
     public void shouldReturnAllCars() {
         AdvertEntity advertEntity = constructAdvertEntity(car, saleInfo);
-        List<AdvertEntity> allCars = new ArrayList<>();
-        allCars.add(advertEntity);
 
-        when(advertEntityRepository.findByStatus(AdvertStatus.OPEN)).thenReturn(allCars);
+        when(advertEntityRepository.findByStatus(OPEN)).thenReturn(singletonList(advertEntity));
 
         List<CarSaleInfo> allCarsResult = carService.getAllCars();
 
         assertThat(allCarsResult).hasSize(1);
-        assertThat(allCarsResult.get(0).getId()).isEqualTo(2);
-        assertThat(allCarsResult.get(0).getCar()).isEqualTo(car);
-        assertThat(allCarsResult.get(0).getSaleInfo()).isEqualTo(saleInfo);
+        CarSaleInfo carSaleInfo = allCarsResult.get(0);
+        assertThat(carSaleInfo.getId()).isEqualTo(advertId);
+        assertThat(carSaleInfo.getCar()).isEqualTo(car);
+        assertThat(carSaleInfo.getSaleInfo()).isEqualTo(saleInfo);
     }
 
     @Test
     public void shouldReturnEmptyListIfThereAreNoCarsInDB() {
-        when(advertEntityRepository.findByStatus(any())).thenReturn(Collections.emptyList());
+        when(advertEntityRepository.findByStatus(OPEN)).thenReturn(emptyList());
 
         assertThat(carService.getAllCars())
             .isEmpty();
@@ -80,16 +80,15 @@ public class CarServiceImplTest {
     @Test
     public void shouldDeleteCarById() {
         carService.deleteCar(carId);
+
         verify(advertEntityRepository).deleteByCarId(carId);
     }
 
     @Test
     public void shouldGetCarSaleInfoById() {
         AdvertEntity advertEntity = constructAdvertEntity(car, saleInfo);
-        List<AdvertEntity> carsByIdAndStatus = new ArrayList<>();
 
-        carsByIdAndStatus.add(advertEntity);
-        when(advertEntityRepository.findByCarIdAndStatus(carId, AdvertStatus.OPEN)).thenReturn(carsByIdAndStatus);
+        when(advertEntityRepository.findByCarIdAndStatus(carId, OPEN)).thenReturn(singletonList(advertEntity));
 
         assertThat(carService.getSaleInfo(carId))
             .isEqualTo(of(new SaleInfo(owner, price)));
@@ -101,15 +100,16 @@ public class CarServiceImplTest {
         ClientEntity clientEntity = constructClientEntity();
         AdvertEntity advertEntity = constructAdvert(carEntity, clientEntity);
 
+        when(carEntityRepository.findByPlateNumber(car.getPlateNumber())).thenReturn(emptyList());
+        when(clientEntityRepository.findByPhoneNumber(owner)).thenReturn(emptyList());
+
         when(carEntityRepository.save(any(CarEntity.class))).thenReturn(carEntity);
         when(clientEntityRepository.save(any(ClientEntity.class))).thenReturn(clientEntity);
         when(advertEntityRepository.save(any(AdvertEntity.class))).thenReturn(advertEntity);
 
-        when(carEntityRepository.findByPlateNumber(car.getPlateNumber())).thenReturn(Collections.emptyList());
-        when(clientEntityRepository.findByPhoneNumber(owner)).thenReturn(Collections.emptyList());
-
         long id = carService.addCar(car, price, owner);
-        assertThat(id).isEqualTo(1L);
+
+        assertThat(id).isEqualTo(carId);
     }
 
     @Test
@@ -121,7 +121,7 @@ public class CarServiceImplTest {
         advertEntity.setCar(carEntity);
         advertEntity.setClient(clientEntity);
         advertEntity.setPrice(price);
-        advertEntity.setStatus(AdvertStatus.OPEN);
+        advertEntity.setStatus(OPEN);
 
         when(carEntityRepository.findByPlateNumber(carEntity.getPlateNumber())).thenReturn(singletonList(carEntity));
         when(clientEntityRepository.findByPhoneNumber(clientEntity.getPhoneNumber())).thenReturn(singletonList(clientEntity));
@@ -131,29 +131,28 @@ public class CarServiceImplTest {
 
         verify(clientEntityRepository, never()).save(any(ClientEntity.class));
         verify(carEntityRepository, never()).save(any(CarEntity.class));
-
     }
 
     private AdvertEntity constructAdvert(CarEntity carEntity, ClientEntity clientEntity) {
         AdvertEntity advertEntity = new AdvertEntity();
-        advertEntity.setId(1L);
+        advertEntity.setId(advertId);
         advertEntity.setClient(clientEntity);
         advertEntity.setPrice(price);
         advertEntity.setCar(carEntity);
-        advertEntity.setStatus(AdvertStatus.OPEN);
+        advertEntity.setStatus(OPEN);
         return advertEntity;
     }
 
     private ClientEntity constructClientEntity() {
         ClientEntity clientEntity = new ClientEntity();
-        clientEntity.setId(1L);
+        clientEntity.setId(clientId);
         clientEntity.setPhoneNumber(owner);
         return clientEntity;
     }
 
     private CarEntity constructCarEntity() {
         CarEntity carEntity = new CarEntity();
-        carEntity.setId(1L);
+        carEntity.setId(carId);
         carEntity.setColor(car.getColor());
         carEntity.setPlateNumber(car.getPlateNumber());
         carEntity.setBrand(car.getBrand());
@@ -165,9 +164,9 @@ public class CarServiceImplTest {
     private AdvertEntity constructAdvertEntity(Car car, SaleInfo saleInfo) {
 
         AdvertEntity advertEntity = new AdvertEntity();
-        advertEntity.setId(2L);
+        advertEntity.setId(advertId);
         advertEntity.setCar(constructCarEntity(car));
-        advertEntity.setStatus(AdvertStatus.OPEN);
+        advertEntity.setStatus(OPEN);
         advertEntity.setClient(constructClientEntity(saleInfo.getOwnerContacts()));
         advertEntity.setPrice(saleInfo.getPrice());
         advertEntity.setDeal(null);
@@ -177,7 +176,7 @@ public class CarServiceImplTest {
 
     private ClientEntity constructClientEntity(String owner) {
         ClientEntity clientEntity = new ClientEntity();
-        clientEntity.setId(1L);
+        clientEntity.setId(clientId);
         clientEntity.setName(owner);
         clientEntity.setPhoneNumber("093");
         return clientEntity;
@@ -186,7 +185,7 @@ public class CarServiceImplTest {
     private CarEntity constructCarEntity(Car car) {
 
         CarEntity carEntity = new CarEntity();
-        carEntity.setId(1L);
+        carEntity.setId(carId);
         carEntity.setModel(car.getModel());
         carEntity.setYear(car.getYear());
         carEntity.setBrand(car.getBrand());

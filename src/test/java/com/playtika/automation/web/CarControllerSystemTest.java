@@ -10,7 +10,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static java.lang.Long.valueOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
@@ -33,9 +32,10 @@ public class CarControllerSystemTest {
 
     @Test
     public void shouldAddCarAndReturnId() throws Exception {
-        String id = postCar();
+        Long id = postCar();
 
-        assertThat(valueOf(id)).isGreaterThan(0);
+        assertThat(id).isGreaterThan(0);
+
     }
 
     @Test
@@ -54,7 +54,7 @@ public class CarControllerSystemTest {
 
     @Test
     public void shouldDeleteCarById() throws Exception {
-        String id = postCar();
+        Long id = postCar();
 
         mockMvc.perform(delete("/cars/" + id)
             .contentType(APPLICATION_JSON_UTF8_VALUE))
@@ -63,7 +63,7 @@ public class CarControllerSystemTest {
 
     @Test
     public void shouldGetSaleInfoByCarId() throws Exception {
-        String id = postCar();
+        Long id = postCar();
 
         mockMvc.perform(get("/cars/" + id)
             .contentType(APPLICATION_JSON_UTF8_VALUE))
@@ -76,8 +76,8 @@ public class CarControllerSystemTest {
             .getContentAsString();
     }
 
-    private String postCar() throws Exception {
-        return mockMvc.perform(post("/cars")
+    private Long postCar() throws Exception {
+        String id = mockMvc.perform(post("/cars")
             .contentType(APPLICATION_JSON_UTF8_VALUE)
             .content("{\"brand\": \"Ford\",\"model\":\"fiesta\"}")
             .param("price", "1000")
@@ -87,5 +87,6 @@ public class CarControllerSystemTest {
             .andReturn()
             .getResponse()
             .getContentAsString();
+        return Long.valueOf(id);
     }
 }

@@ -19,11 +19,10 @@ public class ClientRepositoryTest extends AbstractDaoTest {
     public void shouldFindByPhoneNumber() {
         ClientEntity clientEntity = constructClientEntity();
 
-        List<ClientEntity> byPhoneNumber = clientDao.findByPhoneNumber("0937746730");
+        List<ClientEntity> resultClientEntity = clientDao.findByPhoneNumber("0937746730");
 
-        assertThat(byPhoneNumber).hasSize(1);
-        assertThat(byPhoneNumber.get(0).getPhoneNumber()).isEqualTo(clientEntity.getPhoneNumber());
-        assertThat(byPhoneNumber.get(0).getId()).isEqualTo(clientEntity.getId());
+        assertThat(resultClientEntity).hasSize(1);
+        assertClientEntitiesAreEqual(resultClientEntity.get(0), clientEntity);
     }
 
     @Test

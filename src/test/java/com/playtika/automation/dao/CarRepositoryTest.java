@@ -20,15 +20,10 @@ public class CarRepositoryTest extends AbstractDaoTest {
     public void shouldFindByPlateNumber() {
         CarEntity carEntity = constructCarEntity();
 
-        List<CarEntity> byPlateNumber = carDao.findByPlateNumber("12-12");
+        List<CarEntity> resultCar = carDao.findByPlateNumber("12-12");
 
-        assertThat(byPlateNumber).hasSize(1);
-        assertThat(byPlateNumber.get(0).getId()).isEqualTo(carEntity.getId());
-        assertThat(byPlateNumber.get(0).getPlateNumber()).isEqualTo(carEntity.getPlateNumber());
-        assertThat(byPlateNumber.get(0).getBrand()).isEqualTo(carEntity.getBrand());
-        assertThat(byPlateNumber.get(0).getColor()).isEqualTo(carEntity.getColor());
-        assertThat(byPlateNumber.get(0).getModel()).isEqualTo(carEntity.getModel());
-
+        assertThat(resultCar).hasSize(1);
+        assertCarEntitiesIsEqual(resultCar.get(0), carEntity);
     }
 
     @Test

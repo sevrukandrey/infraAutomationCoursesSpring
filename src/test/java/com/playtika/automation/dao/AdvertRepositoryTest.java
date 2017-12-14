@@ -93,13 +93,23 @@ public class AdvertRepositoryTest extends AbstractDaoTest {
     }
 
     @Test
+    @DataSet(value = "add-advert.xml",
+            useSequenceFiltering = false,
+            disableConstraints = true)
     public void shouldReturnEmptyListIfAdvertByStatusNotFound(){
+        List<AdvertEntity> findByStatus = dao.findByStatus(AdvertStatus.CLOSED);
 
+        assertThat(findByStatus).isEmpty();
     }
 
     @Test
+    @DataSet(value = "add-advert.xml",
+            useSequenceFiltering = false,
+            disableConstraints = true)
     public void shouldReturnEmptyListIfAdvertByStatusAndCarNotFound(){
+        List<AdvertEntity> findByStatus = dao.findByCarIdAndStatus(2, AdvertStatus.CLOSED);
 
+        assertThat(findByStatus).isEmpty();
     }
 
     private CarEntity constructCarEntity() {

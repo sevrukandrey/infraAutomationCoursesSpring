@@ -7,7 +7,6 @@ import org.springframework.data.repository.NoRepositoryBean;
 
 import java.util.List;
 
-@NoRepositoryBean
 public interface AdvertEntityRepository extends JpaRepository<AdvertEntity, Long> {
 
     List<AdvertEntity> findByStatus(AdvertStatus status);

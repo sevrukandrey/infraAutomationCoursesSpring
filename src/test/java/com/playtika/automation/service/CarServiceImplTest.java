@@ -31,6 +31,8 @@ public class CarServiceImplTest {
     private Car car;
     private SaleInfo saleInfo;
     private AdvertEntity advertEntity;
+    private CarEntity carEntity;
+    private ClientEntity clientEntity;
 
     private CarService carService;
 
@@ -48,7 +50,9 @@ public class CarServiceImplTest {
         carService = new CarServiceImpl(carEntityRepository, clientEntityRepository, advertEntityRepository);
         car = new Car("ford", "fiesta", "12-12", "green", 2016);
         saleInfo = new SaleInfo("093", 1000.0);
-        advertEntity = constructAdvertEntity(car, saleInfo);
+        carEntity = constructCarEntity(car);
+        clientEntity = constructClientEntity();
+        advertEntity = constructAdvertEntity(carEntity, clientEntity);
     }
 
     @Test
@@ -92,10 +96,10 @@ public class CarServiceImplTest {
     public void shouldAddCar() {
 
         when(carEntityRepository.findByPlateNumber(car.getPlateNumber())).thenReturn(emptyList());
-        when(clientEntityRepository.findByPhoneNumber("093")).thenReturn(emptyList());
+        when(clientEntityRepository.findByPhoneNumber(saleInfo.getOwnerContacts())).thenReturn(emptyList());
 
-        when(carEntityRepository.save(any(CarEntity.class))).thenReturn(advertEntity.getCar());
-        when(clientEntityRepository.save(any(ClientEntity.class))).thenReturn(advertEntity.getClient());
+        when(carEntityRepository.save(any(CarEntity.class))).thenReturn(carEntity);
+        when(clientEntityRepository.save(any(ClientEntity.class))).thenReturn(clientEntity);
         when(advertEntityRepository.save(any(AdvertEntity.class))).thenReturn(advertEntity);
 
         long id = carService.addCar(car, 100, "093");
@@ -106,8 +110,8 @@ public class CarServiceImplTest {
     @Test
     public void shouldNotSaveClientAndCarIfSameExist() {
 
-        when(carEntityRepository.findByPlateNumber(advertEntity.getCar().getPlateNumber())).thenReturn(singletonList(advertEntity.getCar()));
-        when(clientEntityRepository.findByPhoneNumber(advertEntity.getClient().getPhoneNumber())).thenReturn(singletonList(advertEntity.getClient()));
+        when(carEntityRepository.findByPlateNumber(car.getPlateNumber())).thenReturn(singletonList(carEntity));
+        when(clientEntityRepository.findByPhoneNumber(saleInfo.getOwnerContacts())).thenReturn(singletonList(clientEntity));
         when(advertEntityRepository.save(any(AdvertEntity.class))).thenReturn(advertEntity);
 
         carService.addCar(car, 1000.0, "093");
@@ -116,23 +120,23 @@ public class CarServiceImplTest {
         verify(carEntityRepository, never()).save(any(CarEntity.class));
     }
 
-    private AdvertEntity constructAdvertEntity(Car car, SaleInfo saleInfo) {
+    private AdvertEntity constructAdvertEntity(CarEntity carEntity, ClientEntity clientEntity) {
 
         AdvertEntity advertEntity = new AdvertEntity();
         advertEntity.setId(1L);
-        advertEntity.setCar(constructCarEntity(car));
+        advertEntity.setCar(carEntity);
         advertEntity.setStatus(OPEN);
-        advertEntity.setClient(constructClientEntity(saleInfo.getOwnerContacts()));
-        advertEntity.setPrice(saleInfo.getPrice());
+        advertEntity.setClient(clientEntity);
+        advertEntity.setPrice(1000.0);
         advertEntity.setDeal(null);
 
         return advertEntity;
     }
 
-    private ClientEntity constructClientEntity(String owner) {
+    private ClientEntity constructClientEntity() {
         ClientEntity clientEntity = new ClientEntity();
         clientEntity.setId(2L);
-        clientEntity.setName(owner);
+        clientEntity.setName("093");
         clientEntity.setPhoneNumber("093");
         return clientEntity;
     }

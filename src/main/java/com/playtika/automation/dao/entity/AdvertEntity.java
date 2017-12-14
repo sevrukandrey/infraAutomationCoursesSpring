@@ -15,7 +15,6 @@ import static javax.persistence.GenerationType.AUTO;
 @Setter
 @ToString
 @NoArgsConstructor
-@AllArgsConstructor
 @Document
 public class AdvertEntity {
 
@@ -24,7 +23,7 @@ public class AdvertEntity {
    @GeneratedValue(strategy = AUTO)
     private Long id;
 
-    @ManyToOne(cascade = REMOVE)
+ @ManyToOne(cascade = REMOVE)
     @JoinColumn(name = "car_id")
     //@Field
     private CarEntity car;
@@ -43,6 +42,14 @@ public class AdvertEntity {
     @Enumerated(STRING)
     //@Field
     private AdvertStatus status;
+
+ public AdvertEntity(CarEntity car, ClientEntity client, DealEntity deal, double price, AdvertStatus status) {
+  this.car = car;
+  this.client = client;
+  this.deal = deal;
+  this.price = price;
+  this.status = status;
+ }
 
 //    @Id
 //    @GeneratedValue(strategy = AUTO)

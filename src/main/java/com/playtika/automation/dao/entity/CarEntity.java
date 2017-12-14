@@ -21,7 +21,7 @@ import static javax.persistence.GenerationType.AUTO;
 @Document
 public class CarEntity {
 
-   // @com.couchbase.client.java.repository.annotation.Id
+    // @com.couchbase.client.java.repository.annotation.Id
    @Id
    @GeneratedValue(strategy = AUTO)
     private Long id;
@@ -36,6 +36,14 @@ public class CarEntity {
     private String model;
   //  @Field
     private String brand;
+
+    public CarEntity(String plateNumber, int year, String color, String model, String brand) {
+        this.plateNumber = plateNumber;
+        this.year = year;
+        this.color = color;
+        this.model = model;
+        this.brand = brand;
+    }
 //
 //   @javax.persistence.Id
 //    @GeneratedValue(strategy = AUTO)

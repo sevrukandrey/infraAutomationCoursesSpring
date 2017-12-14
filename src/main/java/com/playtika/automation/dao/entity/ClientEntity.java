@@ -12,7 +12,6 @@ import static javax.persistence.GenerationType.AUTO;
 @Entity(name = "client")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 @ToString
 @Document
@@ -23,12 +22,18 @@ public class ClientEntity {
     @GeneratedValue(strategy = AUTO)
     private Long id;
   //  @Field
+
     private String name;
   //  @Field
     private String surname;
   //  @Field
     private String phoneNumber;
 
+    public ClientEntity(String name, String surname, String phoneNumber) {
+        this.name = name;
+        this.surname = surname;
+        this.phoneNumber = phoneNumber;
+    }
 
 //    @javax.persistence.Id
 //    @GeneratedValue(strategy = AUTO)

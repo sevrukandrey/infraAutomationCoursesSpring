@@ -5,7 +5,6 @@ import com.playtika.automation.domain.AdvertStatus;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 @NoRepositoryBean
@@ -15,6 +14,5 @@ public interface AdvertEntityRepository extends CrudRepository<AdvertEntity, Lon
 
     List<AdvertEntity> findByCarIdAndStatus(long carId, AdvertStatus status);
 
-    @Transactional
-    void deleteByCarId(Long carId);
+    void deleteByCarId(long carId);
 }

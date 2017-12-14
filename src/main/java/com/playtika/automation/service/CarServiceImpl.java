@@ -56,6 +56,7 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
+    @Transactional
     public void deleteCar(long carId) {
         advertEntityRepository.deleteByCarId(carId);
     }

@@ -1,5 +1,6 @@
 package com.playtika.automation.dao.entity;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,7 +19,6 @@ import static javax.persistence.GenerationType.AUTO;
 @Setter
 @ToString
 @NoArgsConstructor
-@Document
 public class CarEntity {
 
     @Id
@@ -27,6 +27,7 @@ public class CarEntity {
 
     private String plateNumber;
     private int year;
+
     private String color;
     private String model;
     private String brand;
@@ -39,3 +40,4 @@ public class CarEntity {
         this.brand = brand;
     }
 }
+

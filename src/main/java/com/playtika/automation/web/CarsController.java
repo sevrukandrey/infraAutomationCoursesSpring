@@ -4,6 +4,10 @@ import com.playtika.automation.domain.Car;
 import com.playtika.automation.domain.CarSaleInfo;
 import com.playtika.automation.domain.SaleInfo;
 import com.playtika.automation.service.CarService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,6 +24,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 @Slf4j
 @RequestMapping(produces = APPLICATION_JSON_UTF8_VALUE)
 @RequiredArgsConstructor
+@Api(value="onlinestore", description="Operations pertaining to products in Car shop")
 public class CarsController {
 
     private final CarService carService;
@@ -32,7 +37,14 @@ public class CarsController {
     }
 
 
-
+    @ApiOperation(value = "Add a car to the cars shop")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Successfully add car"),
+        @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+        @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
+        @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
+    }
+    )
     @PostMapping(value = "/cars")
     public long addCar(@RequestBody Car car,
                        @RequestParam("price") double price,
@@ -45,16 +57,19 @@ public class CarsController {
         return id;
     }
 
+    @ApiOperation(value = "View a list of available cars sale info in shop", response = CarSaleInfo.class)
     @GetMapping(value = "/cars")
     public List<CarSaleInfo> getAllCars() {
         return carService.getAllCars();
     }
 
+    @ApiOperation(value = "Delete car by car_id from car shop")
     @DeleteMapping(value = "/cars/{id}")
     public void deleteCar(@PathVariable("id") long id) {
         carService.deleteCar(id);
     }
 
+    @ApiOperation(value = "Get sale info for car by id", response = SaleInfo.class)
     @GetMapping(value = "/cars/{id}")
     public SaleInfo getCarDetails(@PathVariable("id") long id) {
         try{

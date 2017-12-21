@@ -13,7 +13,6 @@ import static javax.persistence.GenerationType.AUTO;
 @Entity(name = "deal")
 @Getter
 @Setter
-@Document
 public class DealEntity {
 
     @Id

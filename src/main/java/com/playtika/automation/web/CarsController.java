@@ -24,7 +24,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 @Slf4j
 @RequestMapping(produces = APPLICATION_JSON_UTF8_VALUE)
 @RequiredArgsConstructor
-@Api(value="onlinestore", description="Operations pertaining to products in Car shop")
+@Api(value = "onlinestore", description = "Operations pertaining to products in Car shop")
 public class CarsController {
 
     private final CarService carService;
@@ -39,10 +39,10 @@ public class CarsController {
 
     @ApiOperation(value = "Add a car to the cars shop")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Successfully add car"),
-        @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
-        @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
-        @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
+            @ApiResponse(code = 200, message = "Successfully add car"),
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 405, message = "Method Not Allowed"),
+            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
     }
     )
     @PostMapping(value = "/cars")
@@ -58,23 +58,34 @@ public class CarsController {
     }
 
     @ApiOperation(value = "View a list of available cars sale info in shop", response = CarSaleInfo.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully returned carSaleInfo for all cars"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "CarSaleInfo not found")})
     @GetMapping(value = "/cars")
     public List<CarSaleInfo> getAllCars() {
         return carService.getAllCars();
     }
 
     @ApiOperation(value = "Delete car by car_id from car shop")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully deleted car by id"),
+            @ApiResponse(code = 400, message = "Bad request")})
     @DeleteMapping(value = "/cars/{id}")
     public void deleteCar(@PathVariable("id") long id) {
         carService.deleteCar(id);
     }
 
     @ApiOperation(value = "Get sale info for car by id", response = SaleInfo.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully returned sale info for car by id"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "SaleInfo for car by id is not found")})
     @GetMapping(value = "/cars/{id}")
     public SaleInfo getCarDetails(@PathVariable("id") long id) {
-        try{
+        try {
             return carService.getSaleInfo(id).orElseThrow(NullPointerException::new);
-        }catch (NullPointerException e){
+        } catch (NullPointerException e) {
             throw new ResourceNotFoundException("There is no Sale Info for car with id  " + id);
         }
     }

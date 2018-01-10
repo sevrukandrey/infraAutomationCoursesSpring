@@ -66,6 +66,11 @@ public class CarServiceImpl implements CarService {
             .map(this::toSaleInfo);
     }
 
+    @Override
+    public void rejectDeal(Long id) {
+
+    }
+
     private CarEntity getOrCreateCarEntity(Car car) {
         return carEntityRepository.findByPlateNumber(car.getPlateNumber())
             .stream()

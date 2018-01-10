@@ -86,4 +86,15 @@ public class CarsController {
             throw new ResourceNotFoundException("There is no Sale Info for car with id  " + id);
         }
     }
+
+
+
+    @PostMapping(value = "/rejectDeal/{id}")
+    public void rejectDeal(@PathVariable("id") long id) {
+
+        carService.rejectDeal(id);
+
+        log.info("Deal with id [id: {}] was rejected", id);
+
+    }
 }

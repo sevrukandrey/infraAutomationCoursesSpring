@@ -17,4 +17,6 @@ public interface CarService {
 
     Optional<SaleInfo> getSaleInfo(long id);
 
+    void rejectDeal(Long id);
+
 }

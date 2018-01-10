@@ -15,6 +15,8 @@ import static javax.persistence.GenerationType.AUTO;
 @Setter
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode
 public class AdvertEntity {
 
     @Id

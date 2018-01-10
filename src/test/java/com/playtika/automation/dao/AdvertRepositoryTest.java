@@ -82,6 +82,7 @@ public class AdvertRepositoryTest extends AbstractDaoTest {
     @ExpectedDataSet("add-advert.xml")
     @Commit
     public void shouldAddAdvert() {
+
         CarEntity carEntity = new CarEntity("12-12", 2012, "green", "x5", "bmw");
         carEntity.setId(1L);
         ClientEntity clientEntity = new ClientEntity("andrey", "sevruk", "0937746730");

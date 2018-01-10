@@ -3,14 +3,15 @@ package com.playtika.automation.service;
 import com.playtika.automation.dao.AdvertEntityRepository;
 import com.playtika.automation.dao.CarEntityRepository;
 import com.playtika.automation.dao.ClientEntityRepository;
+import com.playtika.automation.dao.DealEntityRepository;
 import com.playtika.automation.dao.entity.AdvertEntity;
 import com.playtika.automation.dao.entity.CarEntity;
 import com.playtika.automation.dao.entity.ClientEntity;
-import com.playtika.automation.domain.AdvertStatus;
-import com.playtika.automation.domain.Car;
-import com.playtika.automation.domain.CarSaleInfo;
-import com.playtika.automation.domain.SaleInfo;
+import com.playtika.automation.dao.entity.DealEntity;
+import com.playtika.automation.domain.*;
+import com.playtika.automation.web.exceptions.DealNotFoundException;
 import org.springframework.stereotype.Service;
+import sun.misc.Cleaner;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -24,11 +25,16 @@ public class CarServiceImpl implements CarService {
     private CarEntityRepository carEntityRepository;
     private ClientEntityRepository clientEntityRepository;
     private AdvertEntityRepository advertEntityRepository;
+    private DealEntityRepository dealEntityRepository;
 
-    public CarServiceImpl(CarEntityRepository carEntityRepository, ClientEntityRepository clientEntityRepository, AdvertEntityRepository advertEntityRepository) {
+    public CarServiceImpl(CarEntityRepository carEntityRepository,
+                          ClientEntityRepository clientEntityRepository,
+                          AdvertEntityRepository advertEntityRepository,
+                          DealEntityRepository dealEntityRepository) {
         this.carEntityRepository = carEntityRepository;
         this.clientEntityRepository = clientEntityRepository;
         this.advertEntityRepository = advertEntityRepository;
+        this.dealEntityRepository = dealEntityRepository;
     }
 
     @Transactional
@@ -38,7 +44,7 @@ public class CarServiceImpl implements CarService {
 
         ClientEntity clientEntity = getOrCreateClientEntity(ownerContacts);
 
-        AdvertEntity advertEntity = persistAdvertEntity(price, carEntity, clientEntity);
+        AdvertEntity advertEntity = getOrCreateAdvertEntity(carEntity, clientEntity, price);
 
 
         return advertEntity.getCar().getId();
@@ -66,6 +72,60 @@ public class CarServiceImpl implements CarService {
             .map(this::toSaleInfo);
     }
 
+    @Override
+    public void rejectDeal(Long id) {
+
+        if (dealEntityRepository.findById(id).isEmpty()) {
+            throw new DealNotFoundException("Deal not found");
+        }
+
+        dealEntityRepository.updateDealWithRejectStatus(id);
+    }
+
+    @Override
+    public long putCarToSale(CarOnSaleRequest carOnSaleRequest) {
+
+        Car car = extractCarFromRequest(carOnSaleRequest);
+        Client client = extractCLientFromRequest(carOnSaleRequest);
+
+        CarEntity carEntity = getOrCreateCarEntity(car);
+        ClientEntity clientEntity = getOrCreateClientEntity(client);
+
+        return getOrCreateAdvertEntity(carEntity, clientEntity, carOnSaleRequest.getPrice()).getId();
+    }
+
+    private AdvertEntity getOrCreateAdvertEntity(CarEntity carEntity, ClientEntity clientEntity, double price) {
+
+        return advertEntityRepository.findByCarIdAndClientIdAndPriceAndStatus(carEntity.getId(), clientEntity.getId(), price, AdvertStatus.OPEN)
+            .stream()
+            .findFirst()
+            .orElseGet(() -> persistAdvertEntity(price, carEntity, clientEntity));
+    }
+
+
+    private Client extractCLientFromRequest(CarOnSaleRequest carOnSaleRequest) {
+        Client client = new Client();
+        client.setName(carOnSaleRequest.getName());
+        client.setSureName(carOnSaleRequest.getSureName());
+        client.setPhoneNumber(carOnSaleRequest.getPhoneNumber());
+        return client;
+    }
+
+    private Car extractCarFromRequest(CarOnSaleRequest carOnSaleRequest) {
+        Car car = new Car();
+        car.setBrand(carOnSaleRequest.getBrand());
+        car.setColor(carOnSaleRequest.getModel());
+        car.setModel(carOnSaleRequest.getModel());
+        car.setPlateNumber(carOnSaleRequest.getPlateNumber());
+        car.setYear(carOnSaleRequest.getYear());
+        return car;
+    }
+
+    @Override
+    public void chooseBestDealByAdvertId(long id) {
+
+    }
+
     private CarEntity getOrCreateCarEntity(Car car) {
         return carEntityRepository.findByPlateNumber(car.getPlateNumber())
             .stream()
@@ -74,6 +134,19 @@ public class CarServiceImpl implements CarService {
     }
 
     private AdvertEntity persistAdvertEntity(double price, CarEntity carEntity, ClientEntity clientEntity) {
+
+        List<AdvertEntity> byCarIdAndStatus = advertEntityRepository.findByCarIdAndClientIdAndStatus(carEntity.getId(), clientEntity.getId(), AdvertStatus.OPEN);
+
+        return byCarIdAndStatus.isEmpty() ? createNewAdvert(price, carEntity, clientEntity) : updateAdvert(byCarIdAndStatus.get(0), price);
+    }
+
+    private AdvertEntity updateAdvert(AdvertEntity advertEntity, double price) {
+        advertEntity.setPrice(price);
+        return advertEntityRepository.save(advertEntity);
+    }
+
+
+    private AdvertEntity createNewAdvert(Double price, CarEntity carEntity, ClientEntity clientEntity) {
         AdvertEntity advertEntity = new AdvertEntity();
         advertEntity.setCar(carEntity);
         advertEntity.setPrice(price);
@@ -82,6 +155,7 @@ public class CarServiceImpl implements CarService {
         return advertEntityRepository.save(advertEntity);
     }
 
+
     private ClientEntity getOrCreateClientEntity(String ownerContacts) {
         return clientEntityRepository.findByPhoneNumber(ownerContacts)
             .stream()
@@ -89,9 +163,25 @@ public class CarServiceImpl implements CarService {
             .orElseGet(() -> saveClientAndGetClientEntity(ownerContacts));
     }
 
+    private ClientEntity getOrCreateClientEntity(Client client) {
+        return clientEntityRepository.findByPhoneNumber(client.getPhoneNumber())
+            .stream()
+            .findFirst()
+            .orElseGet(() -> saveClientAndGetClientEntity(client));
+    }
+
     private ClientEntity saveClientAndGetClientEntity(String ownerContacts) {
         ClientEntity clientEntity = new ClientEntity();
         clientEntity.setPhoneNumber(ownerContacts);
+
+        return clientEntityRepository.save(clientEntity);
+    }
+
+    private ClientEntity saveClientAndGetClientEntity(Client client) {
+        ClientEntity clientEntity = new ClientEntity();
+        clientEntity.setPhoneNumber(client.getPhoneNumber());
+        clientEntity.setName(client.getName());
+        clientEntity.setSurname(client.getSureName());
 
         return clientEntityRepository.save(clientEntity);
     }

@@ -90,13 +90,20 @@ public class CarsControllerIntegrationTest {
 
     @Test
     public void shouldDeleteCar() throws Exception {
-        doNothing().when(carService).deleteCar(1L);
-
         mockMvc.perform(delete("/cars/1")
                 .contentType(APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(status().isOk());
 
         verify(carService).deleteCar(1L);
+    }
+
+    @Test
+    public void shouldRejectDeal() throws Exception {
+        mockMvc.perform(post("/rejectDeal/1")
+                .contentType(APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(status().isOk());
+
+        verify(carService).rejectDeal(1L);
     }
 
     @Test
@@ -116,7 +123,7 @@ public class CarsControllerIntegrationTest {
     }
 
     @Test
-    public void shouldReturnNotFoundfIfCarSaleInfoIsEmpty() throws Exception {
+    public void shouldReturnNotFoundIfCarSaleInfoIsEmpty() throws Exception {
         mockMvc.perform(get("/cars/1").accept(APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }

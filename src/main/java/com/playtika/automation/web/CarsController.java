@@ -1,6 +1,7 @@
 package com.playtika.automation.web;
 
 import com.playtika.automation.domain.Car;
+import com.playtika.automation.domain.CarOnSaleRequest;
 import com.playtika.automation.domain.CarSaleInfo;
 import com.playtika.automation.domain.SaleInfo;
 import com.playtika.automation.service.CarService;
@@ -86,4 +87,29 @@ public class CarsController {
             throw new ResourceNotFoundException("There is no Sale Info for car with id  " + id);
         }
     }
+
+
+
+    @PostMapping(value = "/rejectDeal/{id}")
+    public void rejectDeal(@PathVariable("id") long id) {
+
+        carService.rejectDeal(id);
+
+        log.info("Deal with id [id: {}] was rejected", id);
+
+    }
+
+
+    @PutMapping(value = "/car/")
+    public long putCarToSale(@RequestBody CarOnSaleRequest carOnSaleRequest) {
+
+       return carService.putCarToSale(carOnSaleRequest);
+
+    }
+
+    @GetMapping(value = "/bestDeal/{id}")
+    public void chooseBestDeal(long id){
+        carService.chooseBestDealByAdvertId(id);
+    }
+
 }

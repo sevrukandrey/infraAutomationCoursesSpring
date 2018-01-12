@@ -95,9 +95,9 @@ public class AdvertRepositoryTest extends AbstractDaoTest {
 
     @Test
     @DataSet(value = "add-advert.xml",
-            useSequenceFiltering = false,
-            disableConstraints = true)
-    public void shouldReturnEmptyListIfAdvertByStatusNotFound(){
+        useSequenceFiltering = false,
+        disableConstraints = true)
+    public void shouldReturnEmptyListIfAdvertByStatusNotFound() {
         List<AdvertEntity> findByStatus = dao.findByStatus(AdvertStatus.CLOSED);
 
         assertThat(findByStatus).isEmpty();
@@ -105,13 +105,31 @@ public class AdvertRepositoryTest extends AbstractDaoTest {
 
     @Test
     @DataSet(value = "add-advert.xml",
-            useSequenceFiltering = false,
-            disableConstraints = true)
-    public void shouldReturnEmptyListIfAdvertByStatusAndCarNotFound(){
+        useSequenceFiltering = false,
+        disableConstraints = true)
+    public void shouldReturnEmptyListIfAdvertByStatusAndCarNotFound() {
         List<AdvertEntity> findByStatus = dao.findByCarIdAndStatus(2, AdvertStatus.CLOSED);
 
         assertThat(findByStatus).isEmpty();
     }
+
+
+    @Test
+    @DataSet(value = "add-advert.xml",
+        useSequenceFiltering = false,
+        disableConstraints = true)
+    public void shouldFindByCarIdAndClientIdAndPriceAndStatus() {
+        assertThat(false).isEqualTo(true);
+    }
+
+    @Test
+    @DataSet(value = "add-advert.xml",
+        useSequenceFiltering = false,
+        disableConstraints = true)
+    public void findByCarIdAndClientIdAndStatus() {
+        assertThat(false).isTrue();
+    }
+
 
     private CarEntity constructCarEntity() {
         return new CarEntity("12-12", 2012, "green", "x5", "bmw");

@@ -20,6 +20,8 @@ public interface AdvertEntityRepository extends JpaRepository<AdvertEntity, Long
 
     List<AdvertEntity> findByCarIdAndClientIdAndStatus(long carId, long clientId, AdvertStatus advertStatus);
 
-
     void deleteByCarId(long carId);
+
+    AdvertEntity findById(Long id);
+
 }

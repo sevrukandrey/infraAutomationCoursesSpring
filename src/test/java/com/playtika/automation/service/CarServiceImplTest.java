@@ -160,8 +160,8 @@ public class CarServiceImplTest {
     }
 
     @Test(expected = DealNotFoundException.class)
-    public void shouldThrowExceptionIfDealBuIdNotFound() {
-        when(dealEntityRepository.findById(1L)).thenReturn(new ArrayList<>());
+    public void shouldThrowExceptionIfDealByIdNotFound() {
+        when(dealEntityRepository.findById(1L)).thenReturn(emptyList());
 
         carService.rejectDeal(1L);
     }

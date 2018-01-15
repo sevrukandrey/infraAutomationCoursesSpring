@@ -115,19 +115,52 @@ public class AdvertRepositoryTest extends AbstractDaoTest {
 
 
     @Test
-    @DataSet(value = "add-advert.xml",
+    @DataSet(value = "advert-by-carid-clientid-status-price.xml",
         useSequenceFiltering = false,
         disableConstraints = true)
     public void shouldFindByCarIdAndClientIdAndPriceAndStatus() {
-        assertThat(false).isEqualTo(true);
+        List<AdvertEntity> expectedAdvert =
+                dao.findByCarIdAndClientIdAndPriceAndStatus(1L, 1L, 200.0, AdvertStatus.OPEN);
+
+        assertThat(expectedAdvert).hasSize(1);
+        assertThat(expectedAdvert.get(0).getCar().getId()).isEqualTo(1);
+        assertThat(expectedAdvert.get(0).getClient().getId()).isEqualTo(1);
+        assertThat(expectedAdvert.get(0).getPrice()).isEqualTo(200);
+        assertThat(expectedAdvert.get(0).getStatus()).isEqualTo(AdvertStatus.OPEN);
+
     }
 
     @Test
-    @DataSet(value = "add-advert.xml",
+    @DataSet(value = "advert-by-carid-clientid-status.xml",
         useSequenceFiltering = false,
         disableConstraints = true)
     public void findByCarIdAndClientIdAndStatus() {
-        assertThat(false).isTrue();
+       List<AdvertEntity> expectedAdvert =
+                dao.findByCarIdAndClientIdAndStatus(1L, 1L, AdvertStatus.OPEN);
+
+        assertThat(expectedAdvert).hasSize(1);
+        assertThat(expectedAdvert.get(0).getCar().getId()).isEqualTo(1);
+        assertThat(expectedAdvert.get(0).getClient().getId()).isEqualTo(1);
+        assertThat(expectedAdvert.get(0).getPrice()).isEqualTo(200);
+        assertThat(expectedAdvert.get(0).getStatus()).isEqualTo(AdvertStatus.OPEN);
+    }
+
+    @Test
+    @DataSet(value = "advert-by-carid-clientid-status.xml",
+            useSequenceFiltering = false,
+            disableConstraints = true)
+    public void shouldFindById() {
+
+        CarEntity carEntity = new CarEntity("12-12", 2012, "green", "x5", "bmw");
+        carEntity.setId(1L);
+        ClientEntity clientEntity = new ClientEntity("andrey", "sevruk", "0937746730");
+        clientEntity.setId(1L);
+
+        AdvertEntity advertEntity = new AdvertEntity(carEntity, clientEntity, null, 200, AdvertStatus.OPEN);
+
+        AdvertEntity advertById = dao.findById(1L);
+
+        assertThat(advertById).isEqualToComparingOnlyGivenFields(advertEntity);
     }
 
 

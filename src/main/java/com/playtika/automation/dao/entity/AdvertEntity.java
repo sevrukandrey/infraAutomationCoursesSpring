@@ -48,4 +48,9 @@ public class AdvertEntity {
         this.status = status;
     }
 
+    public AdvertEntity(Long id, double price) {
+        this.id = id;
+        this.price = price;
+    }
+
 }

@@ -47,10 +47,26 @@ public class CarControllerSystemTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.[0]car.model", is("fiesta")))
-            .andExpect(jsonPath("$.[0]car.brand", is("Ford")))
+            .andExpect(jsonPath("$.[0]car.brand", is("ford")))
             .andExpect(jsonPath("$.[0]saleInfo.price", is(1000.0)))
-            .andExpect(jsonPath("$.[0]saleInfo.ownerContacts", is("Andrey")));
+            .andExpect(jsonPath("$.[0]saleInfo.ownerContacts", is("093")));
     }
+
+    @Test
+    public void shouldPutCarOnSale() throws Exception {
+        String putCarForSale = "{\"brand\": \"ford\",\"model\":\"fiesta\",\"plateNumber\":\"12-22\"," +
+                "\"year\":\"1212\",\"color\":\"green\"," +
+                "\"name\":\"Andrey\",\"sureName\":\"Sevruk\",\"phoneNumber\":\"093\",\"price\":\"1000\"}";
+
+        String contentAsString = mockMvc.perform(put("/car")
+                .contentType(APPLICATION_JSON_UTF8_VALUE)
+                .content(putCarForSale))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE)).andReturn().getResponse().getContentAsString();
+
+        assertThat(Long.valueOf(contentAsString)).isEqualTo(1L);
+    }
+
 
     @Test
     public void shouldDeleteCarById() throws Exception {
@@ -74,6 +90,19 @@ public class CarControllerSystemTest {
             .andReturn()
             .getResponse()
             .getContentAsString();
+    }
+
+
+    @Test
+    public void shouldRejectDealById() throws Exception {
+        //add deal and get Id should implement endpoint
+
+        mockMvc.perform(post("/rejectDeal/1")
+                .contentType(APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
     }
 
     private Long postCar() throws Exception {

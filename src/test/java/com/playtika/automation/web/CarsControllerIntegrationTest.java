@@ -2,6 +2,7 @@ package com.playtika.automation.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.playtika.automation.domain.Car;
+import com.playtika.automation.domain.CarOnSaleRequest;
 import com.playtika.automation.domain.CarSaleInfo;
 import com.playtika.automation.domain.SaleInfo;
 import com.playtika.automation.service.CarService;
@@ -15,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -126,6 +128,44 @@ public class CarsControllerIntegrationTest {
     public void shouldReturnNotFoundIfCarSaleInfoIsEmpty() throws Exception {
         mockMvc.perform(get("/cars/1").accept(APPLICATION_JSON))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void shouldPutCarOnSale() throws Exception {
+        String request = "{\"brand\": \"ford\",\"model\":\"fiesta\",\"plateNumber\":\"12-22\",\"year\":\"1212\",\"color\":\"green\"," +
+                "\"name\":\"Andrey\",\"sureName\":\"Sevruk\",\"phoneNumber\":\"093\",\"price\":\"1000\"}";
+
+        CarOnSaleRequest carOnSaleRequest = constructPutCarOnSaleRequest();
+
+        when(carService.putCarToSale(carOnSaleRequest)).thenReturn(1L);
+
+        String contentAsString = mockMvc.perform(put("/car")
+                .contentType(APPLICATION_JSON_UTF8_VALUE)
+                .content(request))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        verify(carService).putCarToSale(carOnSaleRequest);
+
+        assertThat(contentAsString).isEqualTo("1");
+    }
+
+    private CarOnSaleRequest constructPutCarOnSaleRequest() {
+        return  CarOnSaleRequest
+                .builder()
+                .brand("ford")
+                .model("fiesta")
+                .plateNumber("12-22")
+                .year(1212)
+                .color("green")
+                .name("Andrey")
+                .sureName("Sevruk")
+                .phoneNumber("093")
+                .price(1000)
+                .build();
     }
 
     private Car constructCar() {

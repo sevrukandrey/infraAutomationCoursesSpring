@@ -22,5 +22,5 @@ public interface CarService {
 
     long putCarToSale(CarOnSaleRequest carOnSaleRequest);
 
-    void chooseBestDealByAdvertId(long id);
+    void chooseBestDealByAdvertId(long advertId);
 }

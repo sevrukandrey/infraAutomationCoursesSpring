@@ -11,12 +11,13 @@ import com.playtika.automation.dao.entity.DealEntity;
 import com.playtika.automation.domain.*;
 import com.playtika.automation.web.exceptions.DealNotFoundException;
 import org.springframework.stereotype.Service;
-import sun.misc.Cleaner;
 
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+import static com.playtika.automation.domain.DealStatus.*;
+import static java.util.Comparator.comparingDouble;
 import static java.util.stream.Collectors.toList;
 
 @Service
@@ -86,7 +87,7 @@ public class CarServiceImpl implements CarService {
     public long putCarToSale(CarOnSaleRequest carOnSaleRequest) {
 
         Car car = extractCarFromRequest(carOnSaleRequest);
-        Client client = extractCLientFromRequest(carOnSaleRequest);
+        Client client = extractClientFromRequest(carOnSaleRequest);
 
         CarEntity carEntity = getOrCreateCarEntity(car);
         ClientEntity clientEntity = getOrCreateClientEntity(client);
@@ -103,7 +104,7 @@ public class CarServiceImpl implements CarService {
     }
 
 
-    private Client extractCLientFromRequest(CarOnSaleRequest carOnSaleRequest) {
+    private Client extractClientFromRequest(CarOnSaleRequest carOnSaleRequest) {
         Client client = new Client();
         client.setName(carOnSaleRequest.getName());
         client.setSureName(carOnSaleRequest.getSureName());
@@ -122,9 +123,35 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public void chooseBestDealByAdvertId(long id) {
+    @Transactional
+    public void chooseBestDealByAdvertId(long advertId) {
 
+        List<DealEntity> allDealByAdvertId = dealEntityRepository.findByAdvertId(advertId);
+
+        DealEntity dealWithHigherPrice = allDealByAdvertId
+                .stream()
+                .filter(dealEntity -> dealEntity.getStatus() == ACTIVE)
+                .max(comparingDouble(DealEntity::getPrice)).get();
+
+        dealWithHigherPrice.setStatus(DealStatus.APPROVED);
+        dealEntityRepository.save(dealWithHigherPrice);
+
+        List<DealEntity> byAdvertIdAndStatus = dealEntityRepository.findByAdvertIdAndStatus(advertId, DealStatus.ACTIVE);
+
+        byAdvertIdAndStatus.forEach(aByIdAdvertId -> {
+            aByIdAdvertId.setStatus(DealStatus.REJECTED);
+            dealEntityRepository.save(aByIdAdvertId);
+        });
+
+        AdvertEntity advertEntity  = advertEntityRepository.findById(advertId);
+
+        advertEntity.setStatus(AdvertStatus.CLOSED);
+        advertEntity.setDeal(dealWithHigherPrice);
+
+        advertEntityRepository.save(advertEntity);
     }
+
+
 
     private CarEntity getOrCreateCarEntity(Car car) {
         return carEntityRepository.findByPlateNumber(car.getPlateNumber())

@@ -92,24 +92,22 @@ public class CarsController {
 
     @PostMapping(value = "/rejectDeal/{id}")
     public void rejectDeal(@PathVariable("id") long id) {
-
         carService.rejectDeal(id);
-
         log.info("Deal with id [id: {}] was rejected", id);
 
     }
 
 
-    @PutMapping(value = "/car/")
+    @PutMapping(value = "/car")
     public long putCarToSale(@RequestBody CarOnSaleRequest carOnSaleRequest) {
 
        return carService.putCarToSale(carOnSaleRequest);
 
     }
 
-    @GetMapping(value = "/bestDeal/{id}")
-    public void chooseBestDeal(long id){
-        carService.chooseBestDealByAdvertId(id);
+    @GetMapping(value = "/bestDeal/{advertId}")
+    public void chooseBestDeal(long advertId){
+        carService.chooseBestDealByAdvertId(advertId);
     }
 
 }

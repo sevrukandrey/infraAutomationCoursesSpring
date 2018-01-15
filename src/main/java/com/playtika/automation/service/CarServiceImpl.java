@@ -104,23 +104,6 @@ public class CarServiceImpl implements CarService {
     }
 
 
-    private Client extractClientFromRequest(CarOnSaleRequest carOnSaleRequest) {
-        Client client = new Client();
-        client.setName(carOnSaleRequest.getName());
-        client.setSureName(carOnSaleRequest.getSureName());
-        client.setPhoneNumber(carOnSaleRequest.getPhoneNumber());
-        return client;
-    }
-
-    private Car extractCarFromRequest(CarOnSaleRequest carOnSaleRequest) {
-        Car car = new Car();
-        car.setBrand(carOnSaleRequest.getBrand());
-        car.setColor(carOnSaleRequest.getModel());
-        car.setModel(carOnSaleRequest.getModel());
-        car.setPlateNumber(carOnSaleRequest.getPlateNumber());
-        car.setYear(carOnSaleRequest.getYear());
-        return car;
-    }
 
     @Override
     @Transactional
@@ -140,8 +123,6 @@ public class CarServiceImpl implements CarService {
 
         dealEntityRepository.save(allDealByAdvertId);
 
-
-
         AdvertEntity advertEntity = advertEntityRepository.findById(advertId);
         advertEntity.setStatus(AdvertStatus.CLOSED);
         advertEntity.setDealId(dealWithHigherPrice.getId());
@@ -150,6 +131,18 @@ public class CarServiceImpl implements CarService {
 
         return dealWithHigherPrice.getId();
     }
+
+    @Override
+    public long createDeal(DealRequest dealRequest) {
+
+        Client client = extractClientFromRequest(dealRequest);
+        ClientEntity buyer = getOrCreateClientEntity(client);
+
+        getOrCreateDealEntity(client, dealRequest.getPrice, dealRequest.getAdvert, DealStatus.ACTIVE);
+
+        return 0;
+    }
+
 
 
     private CarEntity getOrCreateCarEntity(Car car) {
@@ -237,4 +230,24 @@ public class CarServiceImpl implements CarService {
             carEntity.getColor(),
             carEntity.getYear());
     }
+
+
+    private Client extractClientFromRequest(CarOnSaleRequest carOnSaleRequest) {
+        Client client = new Client();
+        client.setName(carOnSaleRequest.getName());
+        client.setSureName(carOnSaleRequest.getSureName());
+        client.setPhoneNumber(carOnSaleRequest.getPhoneNumber());
+        return client;
+    }
+
+    private Car extractCarFromRequest(CarOnSaleRequest carOnSaleRequest) {
+        Car car = new Car();
+        car.setBrand(carOnSaleRequest.getBrand());
+        car.setColor(carOnSaleRequest.getModel());
+        car.setModel(carOnSaleRequest.getModel());
+        car.setPlateNumber(carOnSaleRequest.getPlateNumber());
+        car.setYear(carOnSaleRequest.getYear());
+        return car;
+    }
+
 }

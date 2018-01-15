@@ -1,9 +1,6 @@
 package com.playtika.automation.service;
 
-import com.playtika.automation.domain.Car;
-import com.playtika.automation.domain.CarOnSaleRequest;
-import com.playtika.automation.domain.CarSaleInfo;
-import com.playtika.automation.domain.SaleInfo;
+import com.playtika.automation.domain.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,4 +20,6 @@ public interface CarService {
     long putCarToSale(CarOnSaleRequest carOnSaleRequest);
 
     long chooseBestDealByAdvertId(long advertId);
+
+    long createDeal(DealRequest dealRequest);
 }

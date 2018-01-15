@@ -1,9 +1,6 @@
 package com.playtika.automation.web;
 
-import com.playtika.automation.domain.Car;
-import com.playtika.automation.domain.CarOnSaleRequest;
-import com.playtika.automation.domain.CarSaleInfo;
-import com.playtika.automation.domain.SaleInfo;
+import com.playtika.automation.domain.*;
 import com.playtika.automation.service.CarService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -108,6 +105,14 @@ public class CarsController {
     @GetMapping(value = "/bestDeal/{advertId}")
     public long chooseBestDeal(long advertId){
         return carService.chooseBestDealByAdvertId(advertId);
+    }
+
+    @PostMapping(value = "/deal")
+    public long createDeal(@RequestBody DealRequest dealRequest) {
+        long dealId = carService.createDeal(dealRequest);
+        log.info("Deal with id [id: {}] was created", dealId);
+        return dealId;
+
     }
 
 }

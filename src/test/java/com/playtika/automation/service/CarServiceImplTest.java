@@ -13,16 +13,19 @@ import com.playtika.automation.web.exceptions.DealNotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.playtika.automation.domain.AdvertStatus.OPEN;
-import static java.util.Collections.*;
+import static com.playtika.automation.domain.DealStatus.ACTIVE;
+import static com.playtika.automation.domain.DealStatus.REJECTED;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -53,6 +56,12 @@ public class CarServiceImplTest {
 
     @Mock
     private DealEntityRepository dealEntityRepository;
+
+    @Captor
+    private ArgumentCaptor<List<DealEntity>> dealEntityArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<AdvertEntity> advertEntityArgumentCaptor;
 
     @Before
     public void init() {
@@ -202,7 +211,7 @@ public class CarServiceImplTest {
 
     }
 
-    @Test  //!!!!!!!!!!!!!!!!!!Work only because @EqualsAndHashCode!!!!!!!!
+    @Test
     public void shouldUpdatePriceForExitingAdvert() {
         when(carEntityRepository.findByPlateNumber(carOnSaleRequest.getPlateNumber())).thenReturn(singletonList(carEntity));
         when(clientEntityRepository.findByPhoneNumber(carOnSaleRequest.getPhoneNumber())).thenReturn(singletonList(clientEntity));
@@ -215,12 +224,46 @@ public class CarServiceImplTest {
             .findByCarIdAndClientIdAndStatus(carEntity.getId(), clientEntity.getId(), AdvertStatus.OPEN))
             .thenReturn(singletonList(advertEntity));
 
-        when(advertEntityRepository.save(any(AdvertEntity.class))).thenReturn(advertEntity);
+        when(advertEntityRepository.save(advertEntityArgumentCaptor.capture())).thenReturn(advertEntity);
 
 
         carService.putCarToSale(carOnSaleRequest);
 
-        verify(advertEntityRepository).save(new AdvertEntity(1L, carEntity, clientEntity, null, carOnSaleRequest.getPrice(), AdvertStatus.OPEN));
+        assertThat(advertEntityArgumentCaptor.getValue()).isEqualToIgnoringNullFields(advertEntity);
+    }
+
+    @Test
+    public void shouldChooseDealWithHigherPrice() {
+        Client client = new Client("vova", "petrov", "099");
+        ClientEntity secondClient = constructClientEntity(client);
+
+        List<DealEntity> dealEntities = new ArrayList<>();
+
+        dealEntities.add(new DealEntity(1L, clientEntity, 200, advertEntity, ACTIVE));
+        dealEntities.add(new DealEntity(2L, secondClient, 400, advertEntity, ACTIVE));
+
+        when(dealEntityRepository.findByAdvertId(1L)).thenReturn(dealEntities);
+        when(dealEntityRepository.save(dealEntityArgumentCaptor.capture()))
+            .thenReturn(anyListOf(DealEntity.class));
+
+        when(advertEntityRepository.findById(1L)).thenReturn(advertEntity);
+
+        when(advertEntityRepository.save(advertEntityArgumentCaptor.capture()))
+            .thenReturn(any(AdvertEntity.class));
+
+        carService.chooseBestDealByAdvertId(1L);
+
+        assertThat(dealEntityArgumentCaptor.getValue()).hasSize(2);
+        assertThat(dealEntityArgumentCaptor.getValue().get(0)).isEqualToIgnoringNullFields(dealEntities.get(0));
+        assertThat(dealEntityArgumentCaptor.getValue().get(1)).isEqualToIgnoringNullFields(dealEntities.get(1));
+
+        assertThat(advertEntityArgumentCaptor.getValue()).isEqualToIgnoringNullFields(advertEntity);
+    }
+
+
+    @Test(expected = DealNotFoundException.class)
+    public void shouldFindDealWithHigherPrice() {
+        carService.chooseBestDealByAdvertId(1L);
     }
 
 
@@ -239,14 +282,13 @@ public class CarServiceImplTest {
     }
 
     private AdvertEntity constructAdvertEntity(CarEntity carEntity, ClientEntity clientEntity) {
-
         AdvertEntity advertEntity = new AdvertEntity();
         advertEntity.setId(1L);
         advertEntity.setCar(carEntity);
         advertEntity.setStatus(OPEN);
         advertEntity.setClient(clientEntity);
         advertEntity.setPrice(1000.0);
-        advertEntity.setDeal(null);
+        advertEntity.setDealId(1L);
 
         return advertEntity;
     }
@@ -263,7 +305,7 @@ public class CarServiceImplTest {
     private DealEntity constructDealEntity() {
         DealEntity dealEntity = new DealEntity();
         dealEntity.setId(1L);
-        dealEntity.setStatus(DealStatus.REJECTED);
+        dealEntity.setStatus(REJECTED);
         dealEntity.setPrice(200);
         return dealEntity;
     }

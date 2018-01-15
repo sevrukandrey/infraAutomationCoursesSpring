@@ -64,7 +64,7 @@ public class CarControllerSystemTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE)).andReturn().getResponse().getContentAsString();
 
-        assertThat(Long.valueOf(contentAsString)).isEqualTo(1L);
+        assertThat(Long.valueOf(contentAsString)).isEqualTo(2L);
     }
 
 

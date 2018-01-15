@@ -106,8 +106,8 @@ public class CarsController {
     }
 
     @GetMapping(value = "/bestDeal/{advertId}")
-    public void chooseBestDeal(long advertId){
-        carService.chooseBestDealByAdvertId(advertId);
+    public long chooseBestDeal(long advertId){
+        return carService.chooseBestDealByAdvertId(advertId);
     }
 
 }

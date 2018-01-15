@@ -1,5 +1,5 @@
 <dataset>
     <deal id="2" price="200" status="ACTIVE" advert_id="1"/>
     <deal id="3" price="200" status="REJECTED" advert_id="2"/>
-    <advert id="1" price="200"/>
+    <advert id="1" price="200" deal_id ="1"/>
 </dataset>

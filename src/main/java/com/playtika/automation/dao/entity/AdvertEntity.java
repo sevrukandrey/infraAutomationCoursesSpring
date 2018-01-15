@@ -2,7 +2,6 @@ package com.playtika.automation.dao.entity;
 
 import com.playtika.automation.domain.AdvertStatus;
 import lombok.*;
-import org.springframework.data.couchbase.core.mapping.Document;
 
 import javax.persistence.*;
 
@@ -16,7 +15,6 @@ import static javax.persistence.GenerationType.AUTO;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 public class AdvertEntity {
 
     @Id
@@ -31,26 +29,26 @@ public class AdvertEntity {
     @JoinColumn(name = "seller_id")
     private ClientEntity client;
 
-    @ManyToOne()
-    @JoinColumn(name = "deal_id")
-    private DealEntity deal;
+    @Column(name = "deal_id")
+    private Long dealId;
 
     private double price;
 
     @Enumerated(STRING)
     private AdvertStatus status;
 
-    public AdvertEntity(CarEntity car, ClientEntity client, DealEntity deal, double price, AdvertStatus status) {
+    public AdvertEntity(CarEntity car, ClientEntity client, Long dealId, double price, AdvertStatus status) {
         this.car = car;
         this.client = client;
-        this.deal = deal;
+        this.dealId = dealId;
         this.price = price;
         this.status = status;
     }
 
-    public AdvertEntity(Long id, double price) {
+    public AdvertEntity(Long id, double price, Long dealId) {
         this.id = id;
         this.price = price;
+        this.dealId = dealId;
     }
 
 }

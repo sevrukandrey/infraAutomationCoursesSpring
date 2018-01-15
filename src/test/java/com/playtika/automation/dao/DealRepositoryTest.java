@@ -3,10 +3,7 @@ package com.playtika.automation.dao;
 import com.github.database.rider.core.api.dataset.DataSet;
 import com.github.database.rider.core.api.dataset.ExpectedDataSet;
 import com.playtika.automation.dao.entity.AdvertEntity;
-import com.playtika.automation.dao.entity.CarEntity;
-import com.playtika.automation.dao.entity.ClientEntity;
 import com.playtika.automation.dao.entity.DealEntity;
-import com.playtika.automation.domain.AdvertStatus;
 import com.playtika.automation.domain.DealStatus;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,36 +45,37 @@ public class DealRepositoryTest extends AbstractDaoTest {
 
     @Test
     @DataSet(value = "deal-by-advertId.xml",
-            useSequenceFiltering = false,
-            disableConstraints = true)
+        useSequenceFiltering = false,
+        disableConstraints = true)
     public void shouldFindByAdvertId() {
         DealEntity dealEntity = new DealEntity();
         dealEntity.setId(2L);
         dealEntity.setPrice(200.0);
         dealEntity.setStatus(DealStatus.ACTIVE);
-        dealEntity.setAdvert(new AdvertEntity(1L,200.0));
+        dealEntity.setAdvert(new AdvertEntity(1L, 200.0, 1L));
 
         List<DealEntity> findById = dao.findByAdvertId(1L);
 
         assertThat(findById).hasSize(1);
-        assertThat(findById.get(0)).isEqualToIgnoringNullFields(dealEntity);
+        assertThat(findById.get(0)).isEqualToComparingFieldByFieldRecursively(dealEntity);
     }
 
     @Test
     @DataSet(value = "deal-by-advertId.xml",
-            useSequenceFiltering = false,
-            disableConstraints = true)
+        useSequenceFiltering = false,
+        disableConstraints = true)
     public void shouldFindByAdvertIdAndStatus() {
         DealEntity dealEntity = new DealEntity();
         dealEntity.setId(2L);
         dealEntity.setPrice(200.0);
         dealEntity.setStatus(DealStatus.ACTIVE);
-        dealEntity.setAdvert(new AdvertEntity(1L,200.0));
+        dealEntity.setAdvert(new AdvertEntity(1L, 200.0, 1L));
 
         List<DealEntity> findById = dao.findByAdvertIdAndStatus(1L, DealStatus.ACTIVE);
 
         assertThat(findById).hasSize(1);
-        assertThat(findById.get(0)).isEqualToIgnoringNullFields(dealEntity);
+
+        assertThat(findById.get(0)).isEqualToComparingFieldByFieldRecursively(dealEntity);
     }
 
 }

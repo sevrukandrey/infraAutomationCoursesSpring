@@ -1,10 +1,7 @@
 package com.playtika.automation.dao.entity;
 
 import com.playtika.automation.domain.DealStatus;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.springframework.data.couchbase.core.mapping.Document;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -14,7 +11,9 @@ import static javax.persistence.GenerationType.AUTO;
 @Entity(name = "deal")
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class DealEntity {
 
     @Id

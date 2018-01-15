@@ -124,33 +124,32 @@ public class CarServiceImpl implements CarService {
 
     @Override
     @Transactional
-    public void chooseBestDealByAdvertId(long advertId) {
-
+    public long chooseBestDealByAdvertId(long advertId) {
         List<DealEntity> allDealByAdvertId = dealEntityRepository.findByAdvertId(advertId);
 
         DealEntity dealWithHigherPrice = allDealByAdvertId
-                .stream()
-                .filter(dealEntity -> dealEntity.getStatus() == ACTIVE)
-                .max(comparingDouble(DealEntity::getPrice)).get();
+            .stream()
+            .filter(dealEntity -> dealEntity.getStatus() == ACTIVE)
+            .max(comparingDouble(DealEntity::getPrice)).orElseThrow( () -> new DealNotFoundException("There is no Deal with Status Active"));
 
         dealWithHigherPrice.setStatus(DealStatus.APPROVED);
-        dealEntityRepository.save(dealWithHigherPrice);
 
-        List<DealEntity> byAdvertIdAndStatus = dealEntityRepository.findByAdvertIdAndStatus(advertId, DealStatus.ACTIVE);
+        allDealByAdvertId.stream()
+            .filter(dealEntity -> dealEntity.getStatus() != APPROVED)
+            .forEach(dealEntity -> dealEntity.setStatus(REJECTED));
 
-        byAdvertIdAndStatus.forEach(aByIdAdvertId -> {
-            aByIdAdvertId.setStatus(DealStatus.REJECTED);
-            dealEntityRepository.save(aByIdAdvertId);
-        });
+        dealEntityRepository.save(allDealByAdvertId);
 
-        AdvertEntity advertEntity  = advertEntityRepository.findById(advertId);
 
+
+        AdvertEntity advertEntity = advertEntityRepository.findById(advertId);
         advertEntity.setStatus(AdvertStatus.CLOSED);
-        advertEntity.setDeal(dealWithHigherPrice);
+        advertEntity.setDealId(dealWithHigherPrice.getId());
 
         advertEntityRepository.save(advertEntity);
-    }
 
+        return dealWithHigherPrice.getId();
+    }
 
 
     private CarEntity getOrCreateCarEntity(Car car) {

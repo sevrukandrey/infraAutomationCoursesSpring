@@ -103,14 +103,15 @@ public class CarsController {
     }
 
     @GetMapping(value = "/bestDeal/{advertId}")
-    public long chooseBestDeal(long advertId){
+    public long chooseBestDeal(@PathVariable("advertId") long advertId){
         return carService.chooseBestDealByAdvertId(advertId);
     }
 
     @PostMapping(value = "/deal")
-    public long createDeal(@RequestBody DealRequest dealRequest) {
-        long dealId = carService.createDeal(dealRequest);
-        log.info("Deal with id [id: {}] was created", dealId);
+    public long createDeal(@RequestBody DealRequest dealRequest,
+                           @RequestParam("advertId") long advertId) {
+        long dealId = carService.createDeal(dealRequest, advertId);
+        log.info("Deal with id [dealId: {}] was created", dealId);
         return dealId;
 
     }

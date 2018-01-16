@@ -9,6 +9,7 @@ import com.playtika.automation.dao.entity.CarEntity;
 import com.playtika.automation.dao.entity.ClientEntity;
 import com.playtika.automation.dao.entity.DealEntity;
 import com.playtika.automation.domain.*;
+import com.playtika.automation.web.exceptions.AdvertNotFoundException;
 import com.playtika.automation.web.exceptions.DealNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -104,7 +105,6 @@ public class CarServiceImpl implements CarService {
     }
 
 
-
     @Override
     @Transactional
     public long chooseBestDealByAdvertId(long advertId) {
@@ -113,9 +113,9 @@ public class CarServiceImpl implements CarService {
         DealEntity dealWithHigherPrice = allDealByAdvertId
             .stream()
             .filter(dealEntity -> dealEntity.getStatus() == ACTIVE)
-            .max(comparingDouble(DealEntity::getPrice)).orElseThrow( () -> new DealNotFoundException("There is no Deal with Status Active"));
+            .max(comparingDouble(DealEntity::getPrice)).orElseThrow(() -> new DealNotFoundException("There is no Deal with Status Active"));
 
-        dealWithHigherPrice.setStatus(DealStatus.APPROVED);
+        dealWithHigherPrice.setStatus(APPROVED);
 
         allDealByAdvertId.stream()
             .filter(dealEntity -> dealEntity.getStatus() != APPROVED)
@@ -133,16 +133,37 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public long createDeal(DealRequest dealRequest) {
+    public long createDeal(DealRequest dealRequest, long advertId) {
+
 
         Client client = extractClientFromRequest(dealRequest);
-        ClientEntity buyer = getOrCreateClientEntity(client);
+        ClientEntity clientEntity = getOrCreateClientEntity(client);
 
-        getOrCreateDealEntity(client, dealRequest.getPrice, dealRequest.getAdvert, DealStatus.ACTIVE);
 
-        return 0;
+        return getOrCreateDealEntity(clientEntity, dealRequest.getPrice(), advertId);
     }
 
+    private long getOrCreateDealEntity(ClientEntity clientEntity, double price, long advertId) {
+        return dealEntityRepository.findByAdvertIdAndBuyerIdAndPriceAndStatus(advertId, clientEntity.getId(), price, ACTIVE)
+            .stream()
+            .findFirst()
+            .orElseGet(() -> persistDealEntity(clientEntity, price, advertId)).getId();
+    }
+
+    private DealEntity persistDealEntity(ClientEntity clientEntity, double price, long advertId) {
+        AdvertEntity advertEntity = advertEntityRepository.findById(advertId);
+
+        if (advertEntity == null){
+            throw new AdvertNotFoundException("advert not found");
+        }
+
+        DealEntity dealEntity = new DealEntity();
+        dealEntity.setStatus(DealStatus.ACTIVE);
+        dealEntity.setBuyer(clientEntity);
+        dealEntity.setAdvert(advertEntity);
+        dealEntity.setPrice(price);
+        return dealEntityRepository.save(dealEntity);
+    }
 
 
     private CarEntity getOrCreateCarEntity(Car car) {
@@ -237,6 +258,14 @@ public class CarServiceImpl implements CarService {
         client.setName(carOnSaleRequest.getName());
         client.setSureName(carOnSaleRequest.getSureName());
         client.setPhoneNumber(carOnSaleRequest.getPhoneNumber());
+        return client;
+    }
+
+    private Client extractClientFromRequest(DealRequest dealRequest) {
+        Client client = new Client();
+        client.setName(dealRequest.getName());
+        client.setSureName(dealRequest.getSureName());
+        client.setPhoneNumber(dealRequest.getPhoneNumber());
         return client;
     }
 

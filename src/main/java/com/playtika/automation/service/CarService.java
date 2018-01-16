@@ -21,5 +21,5 @@ public interface CarService {
 
     long chooseBestDealByAdvertId(long advertId);
 
-    long createDeal(DealRequest dealRequest);
+    long createDeal(DealRequest dealRequest, long advertId);
 }

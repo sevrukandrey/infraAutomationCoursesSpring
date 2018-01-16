@@ -19,10 +19,13 @@ public class DealEntity {
     @Id
     @GeneratedValue(strategy = AUTO)
     private Long id;
+
     @ManyToOne
     @JoinColumn(name = "buyer_id")
     private ClientEntity buyer;
+
     private double price;
+
     @ManyToOne
     @JoinColumn(name = "advert_id")
     private AdvertEntity advert;

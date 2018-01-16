@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.playtika.automation.domain.AdvertStatus.OPEN;
@@ -264,6 +265,24 @@ public class CarServiceImplTest {
     @Test(expected = DealNotFoundException.class)
     public void shouldFindDealWithHigherPrice() {
         carService.chooseBestDealByAdvertId(1L);
+    }
+
+
+    @Test
+    public void shouldAddDeal(){
+        DealRequest dealRequest = new DealRequest();
+        dealRequest.setName("Andrey");
+        dealRequest.setPhoneNumber("09633");
+        dealRequest.setPrice(500);
+        dealRequest.setSureName("Sevruk");
+
+        when(dealEntityRepository.findByAdvertIdAndBuyerIdAndPriceAndStatus(advertEntity.getId(), clientEntity.getId(), 500, ACTIVE))
+            .thenReturn(Collections.emptyList());
+
+        when(advertEntityRepository.findById(advertEntity.getId())).thenReturn(advertEntity);
+
+        carService.createDeal(dealRequest, 1L);
+
     }
 
 

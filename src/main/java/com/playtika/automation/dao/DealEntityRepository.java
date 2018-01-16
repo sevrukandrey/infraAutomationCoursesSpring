@@ -1,13 +1,10 @@
 package com.playtika.automation.dao;
 
-import com.playtika.automation.dao.entity.AdvertEntity;
 import com.playtika.automation.dao.entity.DealEntity;
-import com.playtika.automation.domain.AdvertStatus;
 import com.playtika.automation.domain.DealStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
@@ -27,4 +24,5 @@ public interface DealEntityRepository extends JpaRepository<DealEntity, Long> {
 
     List<DealEntity> findById(Long id);
 
+    List<DealEntity> findByAdvertIdAndBuyerIdAndPriceAndStatus(long advertId, Long ClientId, double price, DealStatus dealStatus);
 }

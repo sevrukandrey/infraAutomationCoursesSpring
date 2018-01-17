@@ -9,6 +9,7 @@ import com.playtika.automation.dao.entity.CarEntity;
 import com.playtika.automation.dao.entity.ClientEntity;
 import com.playtika.automation.dao.entity.DealEntity;
 import com.playtika.automation.domain.*;
+import com.playtika.automation.web.exceptions.AdvertClosedException;
 import com.playtika.automation.web.exceptions.AdvertNotFoundException;
 import com.playtika.automation.web.exceptions.DealNotFoundException;
 import org.springframework.stereotype.Service;
@@ -89,62 +90,40 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public long putCarToSale(CarOnSaleRequest carOnSaleRequest) {
+        CarEntity carEntity = getOrCreateCarEntity(carOnSaleRequest.getCar());
+        ClientEntity clientEntity = getOrCreateClientEntity(carOnSaleRequest.getClient());
 
-        Car car = extractCarFromRequest(carOnSaleRequest);
-        Client client = extractClientFromRequest(carOnSaleRequest);
-
-        CarEntity carEntity = getOrCreateCarEntity(car);
-        ClientEntity clientEntity = getOrCreateClientEntity(client);
-
-        return getOrCreateAdvertEntity(carEntity, clientEntity, carOnSaleRequest.getPrice()).getId();
+        return getOrCreateAdvertEntity(carEntity, clientEntity, carOnSaleRequest.getPrice())
+                .getId();
     }
-
-    private AdvertEntity getOrCreateAdvertEntity(CarEntity carEntity, ClientEntity clientEntity, double price) {
-
-        return advertEntityRepository.findByCarIdAndClientIdAndPriceAndStatus(carEntity.getId(), clientEntity.getId(), price, OPEN)
-            .stream()
-            .findFirst()
-            .orElseGet(() -> persistAdvertEntity(price, carEntity, clientEntity));
-    }
-
 
     @Override
     @Transactional
     public long chooseBestDealByAdvertId(long advertId) {
+
+        AdvertEntity advertEntity = isAdvertExist(advertId);
+
         List<DealEntity> allDealByAdvertId = dealEntityRepository.findByAdvertId(advertId);
 
-        DealEntity dealWithHigherPrice = allDealByAdvertId
-            .stream()
-            .filter(dealEntity -> dealEntity.getStatus() == ACTIVE)
-            .max(comparingDouble(DealEntity::getPrice))
-            .orElseThrow(() -> new DealNotFoundException("There is no Deal with Status Active"));
-
+        DealEntity dealWithHigherPrice = getDealWithHigherPrice(allDealByAdvertId);
         dealWithHigherPrice.setStatus(APPROVED);
 
-        allDealByAdvertId.stream()
-            .filter(dealEntity -> dealEntity.getStatus() != APPROVED)
-            .forEach(dealEntity -> dealEntity.setStatus(REJECTED));
+        rejectDealWithLowerPrice(allDealByAdvertId);
 
         dealEntityRepository.save(allDealByAdvertId);
 
-        AdvertEntity advertEntity = advertEntityRepository.findById(advertId);
-        advertEntity.setStatus(CLOSED);
-        advertEntity.setDealId(dealWithHigherPrice.getId());
-
-        advertEntityRepository.save(advertEntity);
+        closeAndSaveAdvert(advertEntity, dealWithHigherPrice);
 
         return dealWithHigherPrice.getId();
     }
 
     @Override
     public long createDeal(DealRequest dealRequest, long advertId) {
-//ToDO validate advert exist and open
-    //TODO client in request
-        Client client = extractClientFromRequest(dealRequest);
-        ClientEntity clientEntity = getOrCreateClientEntity(client);
+        AdvertEntity advertEntity = isAdvertExist(advertId);
 
+        ClientEntity clientEntity= getOrCreateClientEntity(dealRequest.getClient());
 
-        return getOrCreateDealEntity(clientEntity, dealRequest.getPrice(), advertId);
+        return getOrCreateDealEntity(clientEntity, dealRequest.getPrice(), advertEntity.getId());
     }
 
     private long getOrCreateDealEntity(ClientEntity clientEntity, double price, long advertId) {
@@ -178,17 +157,17 @@ public class CarServiceImpl implements CarService {
     }
 
     private AdvertEntity persistAdvertEntity(double price, CarEntity carEntity, ClientEntity clientEntity) {
+        List<AdvertEntity> byCarIdAndStatus = advertEntityRepository.findByCarIdAndClientIdAndStatus(carEntity.getId(),
+                clientEntity.getId(), OPEN);
 
-        List<AdvertEntity> byCarIdAndStatus = advertEntityRepository.findByCarIdAndClientIdAndStatus(carEntity.getId(), clientEntity.getId(), OPEN);
-
-        return byCarIdAndStatus.isEmpty() ? createNewAdvert(price, carEntity, clientEntity) : updateAdvert(byCarIdAndStatus.get(0), price);
+        return byCarIdAndStatus.isEmpty() ? createNewAdvert(price, carEntity, clientEntity)
+                : updateAdvert(byCarIdAndStatus.get(0), price);
     }
 
     private AdvertEntity updateAdvert(AdvertEntity advertEntity, double price) {
         advertEntity.setPrice(price);
         return advertEntityRepository.save(advertEntity);
     }
-
 
     private AdvertEntity createNewAdvert(Double price, CarEntity carEntity, ClientEntity clientEntity) {
         AdvertEntity advertEntity = new AdvertEntity();
@@ -198,7 +177,6 @@ public class CarServiceImpl implements CarService {
         advertEntity.setStatus(OPEN);
         return advertEntityRepository.save(advertEntity);
     }
-
 
     private ClientEntity getOrCreateClientEntity(String ownerContacts) {
         return clientEntityRepository.findByPhoneNumber(ownerContacts)
@@ -256,30 +234,44 @@ public class CarServiceImpl implements CarService {
             carEntity.getYear());
     }
 
-
-    private Client extractClientFromRequest(CarOnSaleRequest carOnSaleRequest) {
-        Client client = new Client();
-   //     client.setName(carOnSaleRequest.getName());
-   //     client.setSureName(carOnSaleRequest.getSureName());
-   //     client.setPhoneNumber(carOnSaleRequest.getPhoneNumber());
-        return client;
+    private AdvertEntity getOrCreateAdvertEntity(CarEntity carEntity, ClientEntity clientEntity, double price) {
+        return advertEntityRepository.findByCarIdAndClientIdAndPriceAndStatus(carEntity.getId(), clientEntity.getId(),
+                price, OPEN)
+                .stream()
+                .findFirst()
+                .orElseGet(() -> persistAdvertEntity(price, carEntity, clientEntity));
     }
 
-    private Client extractClientFromRequest(DealRequest dealRequest) {
-        Client client = new Client();
-//        client.setName(dealRequest.getName());
- //       client.setSureName(dealRequest.getSureName());
- //       client.setPhoneNumber(dealRequest.getPhoneNumber());
-        return client;
+    private void closeAndSaveAdvert(AdvertEntity advertEntity, DealEntity dealWithHigherPrice) {
+        advertEntity.setStatus(CLOSED);
+        advertEntity.setDealId(dealWithHigherPrice.getId());
+
+        advertEntityRepository.save(advertEntity);
     }
 
-    private Car extractCarFromRequest(CarOnSaleRequest carOnSaleRequest) {
-        Car car = new Car();
- //       car.setBrand(carOnSaleRequest.getBrand());
-  //      car.setColor(carOnSaleRequest.getModel());
- //       car.setModel(carOnSaleRequest.getModel());
-//        car.setYear(carOnSaleRequest.getYear());
-        return car;
+    private void rejectDealWithLowerPrice(List<DealEntity> allDealByAdvertId) {
+        allDealByAdvertId.stream()
+                .filter(dealEntity -> dealEntity.getStatus() != APPROVED)
+                .forEach(dealEntity -> dealEntity.setStatus(REJECTED));
+    }
+
+    private DealEntity getDealWithHigherPrice(List<DealEntity> allDealByAdvertId) {
+        return allDealByAdvertId
+                .stream()
+                .filter(dealEntity -> dealEntity.getStatus() == ACTIVE)
+                .max(comparingDouble(DealEntity::getPrice))
+                .orElseThrow(() -> new DealNotFoundException("There is no Deal with Status Active"));
+    }
+
+    private AdvertEntity isAdvertExist(long advertId) {
+        AdvertEntity advertEntity = advertEntityRepository.findById(advertId);
+
+        if(advertEntity == null)
+            throw new AdvertNotFoundException(String.format("Advert with is %s not found", advertId));
+        if(advertEntity.getStatus() == AdvertStatus.CLOSED) {
+            throw  new AdvertClosedException(String.format("Advert with id %s is already closed", advertId));
+        }
+        return advertEntity;
     }
 
 }

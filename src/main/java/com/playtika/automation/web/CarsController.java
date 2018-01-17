@@ -34,10 +34,10 @@ public class CarsController {
 
     @ApiOperation(value = "Add a car to the cars shop")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successfully add car"),
-            @ApiResponse(code = 400, message = "Bad Request"),
-            @ApiResponse(code = 405, message = "Method Not Allowed"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
+        @ApiResponse(code = 200, message = "Successfully add car"),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 405, message = "Method Not Allowed"),
+        @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
     }
     )
     @PostMapping(value = "/cars")
@@ -54,9 +54,9 @@ public class CarsController {
 
     @ApiOperation(value = "View a list of available cars sale info in shop", response = CarSaleInfo.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successfully returned carSaleInfo for all cars"),
-            @ApiResponse(code = 400, message = "Bad request"),
-            @ApiResponse(code = 404, message = "CarSaleInfo not found")})
+        @ApiResponse(code = 200, message = "Successfully returned carSaleInfo for all cars"),
+        @ApiResponse(code = 400, message = "Bad request"),
+        @ApiResponse(code = 404, message = "CarSaleInfo not found")})
     @GetMapping(value = "/cars")
     public List<CarSaleInfo> getAllCars() {
         return carService.getAllCars();
@@ -64,8 +64,8 @@ public class CarsController {
 
     @ApiOperation(value = "Delete car by car_id from car shop")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successfully deleted car by id"),
-            @ApiResponse(code = 400, message = "Bad request")})
+        @ApiResponse(code = 200, message = "Successfully deleted car by id"),
+        @ApiResponse(code = 400, message = "Bad request")})
     @DeleteMapping(value = "/cars/{id}")
     public void deleteCar(@PathVariable("id") long id) {
         carService.deleteCar(id);
@@ -73,9 +73,9 @@ public class CarsController {
 
     @ApiOperation(value = "Get sale info for car by id", response = SaleInfo.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successfully returned sale info for car by id"),
-            @ApiResponse(code = 400, message = "Bad request"),
-            @ApiResponse(code = 404, message = "SaleInfo for car by id is not found")})
+        @ApiResponse(code = 200, message = "Successfully returned sale info for car by id"),
+        @ApiResponse(code = 400, message = "Bad request"),
+        @ApiResponse(code = 404, message = "SaleInfo for car by id is not found")})
     @GetMapping(value = "/cars/{id}")
     public SaleInfo getCarDetails(@PathVariable("id") long id) {
         try {
@@ -85,28 +85,27 @@ public class CarsController {
         }
     }
 
-
-
-    @PostMapping(value = "/rejectDeal/{id}")
-    public void rejectDeal(@PathVariable("id") long id) {
-        carService.rejectDeal(id);
-        log.info("Deal with id [id: {}] was rejected", id);
+    //TODO add swagger
+    @PostMapping(value = "/rejectDeal")
+    public void rejectDeal(@RequestParam("dealId") long dealId) {
+        carService.rejectDeal(dealId);
+        log.info("Deal with id [dealId:{}] was rejected", dealId);
 
     }
 
-
+    //TODO add swagger
     @PutMapping(value = "/car")
     public long putCarToSale(@RequestBody CarOnSaleRequest carOnSaleRequest) {
-
-       return carService.putCarToSale(carOnSaleRequest);
-
+        return carService.putCarToSale(carOnSaleRequest);
     }
 
-    @GetMapping(value = "/bestDeal/{advertId}")
-    public long chooseBestDeal(@PathVariable("advertId") long advertId){
+    //TODO add swagger
+    @GetMapping(value = "/bestDeal")
+    public long chooseBestDeal(@RequestParam("advertId") long advertId) {
         return carService.chooseBestDealByAdvertId(advertId);
     }
 
+    //TODO add swagger
     @PostMapping(value = "/deal")
     public long createDeal(@RequestBody DealRequest dealRequest,
                            @RequestParam("advertId") long advertId) {

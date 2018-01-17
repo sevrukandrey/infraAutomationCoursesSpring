@@ -3,10 +3,6 @@ package com.playtika.automation.dao;
 import com.playtika.automation.dao.entity.AdvertEntity;
 import com.playtika.automation.domain.AdvertStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.NoRepositoryBean;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -24,4 +20,5 @@ public interface AdvertEntityRepository extends JpaRepository<AdvertEntity, Long
 
     AdvertEntity findById(Long id);
 
+    List<AdvertEntity> findByIdAndStatus(long advertId, AdvertStatus advertStatus);
 }

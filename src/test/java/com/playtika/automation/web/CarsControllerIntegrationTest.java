@@ -16,12 +16,12 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -156,14 +156,14 @@ public class CarsControllerIntegrationTest {
     private CarOnSaleRequest constructPutCarOnSaleRequest() {
         return  CarOnSaleRequest
                 .builder()
-                .brand("ford")
-                .model("fiesta")
-                .plateNumber("12-22")
-                .year(1212)
-                .color("green")
-                .name("Andrey")
-                .sureName("Sevruk")
-                .phoneNumber("093")
+ //               .brand("ford")
+ //               .model("fiesta")
+ //               .plateNumber("12-22")
+  //              .year(1212)
+  //              .color("green")
+  //              .name("Andrey")
+ ///               .sureName("Sevruk")
+  //              .phoneNumber("093")
                 .price(1000)
                 .build();
     }

@@ -1,16 +1,14 @@
 package com.playtika.automation.dao;
 
 import com.github.database.rider.core.api.dataset.DataSet;
-import com.github.database.rider.core.api.dataset.ExpectedDataSet;
 import com.playtika.automation.dao.entity.AdvertEntity;
 import com.playtika.automation.dao.entity.DealEntity;
-import com.playtika.automation.domain.DealStatus;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Commit;
 
 import java.util.List;
 
+import static com.playtika.automation.domain.DealStatus.ACTIVE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class DealRepositoryTest extends AbstractDaoTest {
@@ -18,29 +16,15 @@ public class DealRepositoryTest extends AbstractDaoTest {
     DealEntityRepository dao;
 
     @Test
-    @DataSet(value = "update-deal-with-reject-status.xml",
-        useSequenceFiltering = false,
-        disableConstraints = true)
-    @ExpectedDataSet("expected-deal-after-reject.xml")
-    @Commit
-    public void shouldRejectDealById() {
-        dao.updateDealWithRejectStatus(1);
-    }
-
-    @Test
     @DataSet(value = "deal-by-id.xml",
         useSequenceFiltering = false,
         disableConstraints = true)
     public void shouldFindByDealId() {
-        DealEntity dealEntity = new DealEntity();
-        dealEntity.setId(2L);
-        dealEntity.setPrice(200.0);
-        dealEntity.setStatus(DealStatus.ACTIVE);
+        DealEntity dealEntity = new DealEntity(2L, null, 200, null, ACTIVE);
 
-        List<DealEntity> findById = dao.findById(2L);
+        DealEntity findByIdDeal = dao.findById(2L);
 
-        assertThat(findById).hasSize(1);
-        assertThat(findById.get(0)).isEqualToIgnoringNullFields(dealEntity);
+        assertThat(findByIdDeal).isEqualToIgnoringNullFields(dealEntity);
     }
 
     @Test
@@ -51,7 +35,7 @@ public class DealRepositoryTest extends AbstractDaoTest {
         DealEntity dealEntity = new DealEntity();
         dealEntity.setId(2L);
         dealEntity.setPrice(200.0);
-        dealEntity.setStatus(DealStatus.ACTIVE);
+        dealEntity.setStatus(ACTIVE);
         dealEntity.setAdvert(new AdvertEntity(1L, 200.0, 1L));
 
         List<DealEntity> findById = dao.findByAdvertId(1L);
@@ -68,10 +52,10 @@ public class DealRepositoryTest extends AbstractDaoTest {
         DealEntity dealEntity = new DealEntity();
         dealEntity.setId(2L);
         dealEntity.setPrice(200.0);
-        dealEntity.setStatus(DealStatus.ACTIVE);
+        dealEntity.setStatus(ACTIVE);
         dealEntity.setAdvert(new AdvertEntity(1L, 200.0, 1L));
 
-        List<DealEntity> findById = dao.findByAdvertIdAndStatus(1L, DealStatus.ACTIVE);
+        List<DealEntity> findById = dao.findByAdvertIdAndStatus(1L, ACTIVE);
 
         assertThat(findById).hasSize(1);
 

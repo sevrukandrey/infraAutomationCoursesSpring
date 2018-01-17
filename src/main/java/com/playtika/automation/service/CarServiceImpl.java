@@ -17,6 +17,8 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+import static com.playtika.automation.domain.AdvertStatus.CLOSED;
+import static com.playtika.automation.domain.AdvertStatus.OPEN;
 import static com.playtika.automation.domain.DealStatus.*;
 import static java.util.Comparator.comparingDouble;
 import static java.util.stream.Collectors.toList;
@@ -54,7 +56,7 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public List<CarSaleInfo> getAllCars() {
-        return advertEntityRepository.findByStatus(AdvertStatus.OPEN)
+        return advertEntityRepository.findByStatus(OPEN)
             .stream()
             .map(this::toCarSaleInfo)
             .collect(toList());
@@ -68,20 +70,21 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public Optional<SaleInfo> getSaleInfo(long carId) {
-        return advertEntityRepository.findByCarIdAndStatus(carId, AdvertStatus.OPEN)
+        return advertEntityRepository.findByCarIdAndStatus(carId, OPEN)
             .stream()
             .findFirst()
             .map(this::toSaleInfo);
     }
 
     @Override
-    public void rejectDeal(Long id) {
+    public void rejectDeal(Long dealId) {
+        DealEntity dealEntity = dealEntityRepository.findById(dealId);
 
-        if (dealEntityRepository.findById(id).isEmpty()) {
-            throw new DealNotFoundException("Deal not found");
-        }
+        if (dealEntity == null) throw new DealNotFoundException(String.format("Deal with id %s not found", dealId));
 
-        dealEntityRepository.updateDealWithRejectStatus(id);
+        dealEntity.setStatus(DealStatus.REJECTED);
+
+        dealEntityRepository.save(dealEntity);
     }
 
     @Override
@@ -98,7 +101,7 @@ public class CarServiceImpl implements CarService {
 
     private AdvertEntity getOrCreateAdvertEntity(CarEntity carEntity, ClientEntity clientEntity, double price) {
 
-        return advertEntityRepository.findByCarIdAndClientIdAndPriceAndStatus(carEntity.getId(), clientEntity.getId(), price, AdvertStatus.OPEN)
+        return advertEntityRepository.findByCarIdAndClientIdAndPriceAndStatus(carEntity.getId(), clientEntity.getId(), price, OPEN)
             .stream()
             .findFirst()
             .orElseGet(() -> persistAdvertEntity(price, carEntity, clientEntity));
@@ -113,7 +116,8 @@ public class CarServiceImpl implements CarService {
         DealEntity dealWithHigherPrice = allDealByAdvertId
             .stream()
             .filter(dealEntity -> dealEntity.getStatus() == ACTIVE)
-            .max(comparingDouble(DealEntity::getPrice)).orElseThrow(() -> new DealNotFoundException("There is no Deal with Status Active"));
+            .max(comparingDouble(DealEntity::getPrice))
+            .orElseThrow(() -> new DealNotFoundException("There is no Deal with Status Active"));
 
         dealWithHigherPrice.setStatus(APPROVED);
 
@@ -124,7 +128,7 @@ public class CarServiceImpl implements CarService {
         dealEntityRepository.save(allDealByAdvertId);
 
         AdvertEntity advertEntity = advertEntityRepository.findById(advertId);
-        advertEntity.setStatus(AdvertStatus.CLOSED);
+        advertEntity.setStatus(CLOSED);
         advertEntity.setDealId(dealWithHigherPrice.getId());
 
         advertEntityRepository.save(advertEntity);
@@ -134,8 +138,8 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public long createDeal(DealRequest dealRequest, long advertId) {
-
-
+//ToDO validate advert exist and open
+    //TODO client in request
         Client client = extractClientFromRequest(dealRequest);
         ClientEntity clientEntity = getOrCreateClientEntity(client);
 
@@ -151,16 +155,16 @@ public class CarServiceImpl implements CarService {
     }
 
     private DealEntity persistDealEntity(ClientEntity clientEntity, double price, long advertId) {
-        AdvertEntity advertEntity = advertEntityRepository.findById(advertId);
 
-        if (advertEntity == null){
-            throw new AdvertNotFoundException("advert not found");
+        List<AdvertEntity> advertEntities = advertEntityRepository.findByIdAndStatus(advertId, OPEN);
+        if (advertEntities.isEmpty()){
+            throw new AdvertNotFoundException("advert not found or close");
         }
 
         DealEntity dealEntity = new DealEntity();
         dealEntity.setStatus(DealStatus.ACTIVE);
         dealEntity.setBuyer(clientEntity);
-        dealEntity.setAdvert(advertEntity);
+        dealEntity.setAdvert(advertEntities.get(0));
         dealEntity.setPrice(price);
         return dealEntityRepository.save(dealEntity);
     }
@@ -175,7 +179,7 @@ public class CarServiceImpl implements CarService {
 
     private AdvertEntity persistAdvertEntity(double price, CarEntity carEntity, ClientEntity clientEntity) {
 
-        List<AdvertEntity> byCarIdAndStatus = advertEntityRepository.findByCarIdAndClientIdAndStatus(carEntity.getId(), clientEntity.getId(), AdvertStatus.OPEN);
+        List<AdvertEntity> byCarIdAndStatus = advertEntityRepository.findByCarIdAndClientIdAndStatus(carEntity.getId(), clientEntity.getId(), OPEN);
 
         return byCarIdAndStatus.isEmpty() ? createNewAdvert(price, carEntity, clientEntity) : updateAdvert(byCarIdAndStatus.get(0), price);
     }
@@ -191,7 +195,7 @@ public class CarServiceImpl implements CarService {
         advertEntity.setCar(carEntity);
         advertEntity.setPrice(price);
         advertEntity.setClient(clientEntity);
-        advertEntity.setStatus(AdvertStatus.OPEN);
+        advertEntity.setStatus(OPEN);
         return advertEntityRepository.save(advertEntity);
     }
 
@@ -255,27 +259,26 @@ public class CarServiceImpl implements CarService {
 
     private Client extractClientFromRequest(CarOnSaleRequest carOnSaleRequest) {
         Client client = new Client();
-        client.setName(carOnSaleRequest.getName());
-        client.setSureName(carOnSaleRequest.getSureName());
-        client.setPhoneNumber(carOnSaleRequest.getPhoneNumber());
+   //     client.setName(carOnSaleRequest.getName());
+   //     client.setSureName(carOnSaleRequest.getSureName());
+   //     client.setPhoneNumber(carOnSaleRequest.getPhoneNumber());
         return client;
     }
 
     private Client extractClientFromRequest(DealRequest dealRequest) {
         Client client = new Client();
-        client.setName(dealRequest.getName());
-        client.setSureName(dealRequest.getSureName());
-        client.setPhoneNumber(dealRequest.getPhoneNumber());
+//        client.setName(dealRequest.getName());
+ //       client.setSureName(dealRequest.getSureName());
+ //       client.setPhoneNumber(dealRequest.getPhoneNumber());
         return client;
     }
 
     private Car extractCarFromRequest(CarOnSaleRequest carOnSaleRequest) {
         Car car = new Car();
-        car.setBrand(carOnSaleRequest.getBrand());
-        car.setColor(carOnSaleRequest.getModel());
-        car.setModel(carOnSaleRequest.getModel());
-        car.setPlateNumber(carOnSaleRequest.getPlateNumber());
-        car.setYear(carOnSaleRequest.getYear());
+ //       car.setBrand(carOnSaleRequest.getBrand());
+  //      car.setColor(carOnSaleRequest.getModel());
+ //       car.setModel(carOnSaleRequest.getModel());
+//        car.setYear(carOnSaleRequest.getYear());
         return car;
     }
 

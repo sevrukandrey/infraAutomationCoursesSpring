@@ -15,7 +15,7 @@ public interface CarService {
 
     Optional<SaleInfo> getSaleInfo(long id);
 
-    void rejectDeal(Long id);
+    void rejectDeal(Long dealId);
 
     long putCarToSale(CarOnSaleRequest carOnSaleRequest);
 

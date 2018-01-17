@@ -10,8 +10,6 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 public class DealRequest {
-    private  String name;
-    private  String sureName;
-    private  String phoneNumber;
+    private Client client;
     private double price;
 }

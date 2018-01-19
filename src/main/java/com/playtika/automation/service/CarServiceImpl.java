@@ -123,27 +123,21 @@ public class CarServiceImpl implements CarService {
 
         ClientEntity clientEntity= getOrCreateClientEntity(dealRequest.getClient());
 
-        return getOrCreateDealEntity(clientEntity, dealRequest.getPrice(), advertEntity.getId());
+        return getOrCreateDealEntity(clientEntity, dealRequest.getPrice(), advertEntity);
     }
 
-    private long getOrCreateDealEntity(ClientEntity clientEntity, double price, long advertId) {
-        return dealEntityRepository.findByAdvertIdAndBuyerIdAndPriceAndStatus(advertId, clientEntity.getId(), price, ACTIVE)
+    private long getOrCreateDealEntity(ClientEntity clientEntity, double price, AdvertEntity advertEntity) {
+        return dealEntityRepository.findByAdvertIdAndBuyerIdAndPriceAndStatus(advertEntity.getId(), clientEntity.getId(), price, ACTIVE)
             .stream()
             .findFirst()
-            .orElseGet(() -> persistDealEntity(clientEntity, price, advertId)).getId();
+            .orElseGet(() -> persistDealEntity(clientEntity, price, advertEntity)).getId();
     }
 
-    private DealEntity persistDealEntity(ClientEntity clientEntity, double price, long advertId) {
-
-        List<AdvertEntity> advertEntities = advertEntityRepository.findByIdAndStatus(advertId, OPEN);
-        if (advertEntities.isEmpty()){
-            throw new AdvertNotFoundException("advert not found or close");
-        }
-
+    private DealEntity persistDealEntity(ClientEntity clientEntity, double price, AdvertEntity advertEntity) {
         DealEntity dealEntity = new DealEntity();
         dealEntity.setStatus(DealStatus.ACTIVE);
         dealEntity.setBuyer(clientEntity);
-        dealEntity.setAdvert(advertEntities.get(0));
+        dealEntity.setAdvert(advertEntity);
         dealEntity.setPrice(price);
         return dealEntityRepository.save(dealEntity);
     }

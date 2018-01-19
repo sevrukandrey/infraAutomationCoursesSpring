@@ -1,11 +1,9 @@
 package com.playtika.automation.dao;
 
 import com.github.database.rider.core.api.dataset.DataSet;
-import com.github.database.rider.core.api.dataset.ExpectedDataSet;
 import com.playtika.automation.dao.entity.ClientEntity;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Commit;
 
 import java.util.List;
 
@@ -29,18 +27,6 @@ public class ClientRepositoryTest extends AbstractDaoTest {
         assertThat(resultClientEntity.get(0)).isEqualToComparingFieldByField(clientEntity);
     }
 
-    @Test
-    @DataSet(
-            value = "empty-dataset.xml",
-            useSequenceFiltering = false,
-            disableConstraints = true)
-    @ExpectedDataSet("add-client.xml")
-    @Commit
-    public void shouldSaveCar() {
-        ClientEntity clientEntity = new ClientEntity("andrey", "sevruk", "0937746730");
-        clientEntity.setId(1L);
-        dao.save(clientEntity);
-    }
 
     @Test
     @DataSet(

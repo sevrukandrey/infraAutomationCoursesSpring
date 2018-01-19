@@ -20,5 +20,4 @@ public interface AdvertEntityRepository extends JpaRepository<AdvertEntity, Long
 
     AdvertEntity findById(Long id);
 
-    List<AdvertEntity> findByIdAndStatus(long advertId, AdvertStatus advertStatus);
 }

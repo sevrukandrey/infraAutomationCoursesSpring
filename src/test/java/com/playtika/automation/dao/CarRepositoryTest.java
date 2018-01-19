@@ -1,16 +1,13 @@
 package com.playtika.automation.dao;
 
 import com.github.database.rider.core.api.dataset.DataSet;
-import com.github.database.rider.core.api.dataset.ExpectedDataSet;
 import com.playtika.automation.dao.entity.CarEntity;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Commit;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CarRepositoryTest extends AbstractDaoTest {
 
@@ -42,15 +39,4 @@ public class CarRepositoryTest extends AbstractDaoTest {
         assertThat(resultCar).isEmpty();
     }
 
-    @Test
-    @DataSet(
-            value = "empty-dataset.xml",
-            useSequenceFiltering = false,
-            disableConstraints = true)
-    @ExpectedDataSet("add-car.xml")
-    @Commit
-    public void shouldSaveCar() {
-        CarEntity carEntity = new CarEntity("12-12", 2012, "green", "x5", "bmw");
-        dao.save(carEntity);
-    }
 }

@@ -1,10 +1,7 @@
 package com.playtika.automation.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.playtika.automation.domain.Car;
-import com.playtika.automation.domain.CarOnSaleRequest;
-import com.playtika.automation.domain.CarSaleInfo;
-import com.playtika.automation.domain.SaleInfo;
+import com.playtika.automation.domain.*;
 import com.playtika.automation.service.CarService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,6 +17,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -60,7 +58,6 @@ public class CarsControllerIntegrationTest {
         assertThat(contentAsString).isEqualTo("1");
     }
 
-
     @Test
     public void shouldGetAllCars() throws Exception {
         when(carService.getAllCars()).thenReturn(singletonList(constructCarsForSale()));
@@ -100,15 +97,6 @@ public class CarsControllerIntegrationTest {
     }
 
     @Test
-    public void shouldRejectDeal() throws Exception {
-        mockMvc.perform(post("/rejectDeal/1")
-                .contentType(APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(status().isOk());
-
-        verify(carService).rejectDeal(1L);
-    }
-
-    @Test
     public void shouldReturnCarSaleInfo() throws Exception {
         SaleInfo carInfo = new SaleInfo("Andrey", 1000.0);
 
@@ -129,6 +117,13 @@ public class CarsControllerIntegrationTest {
         mockMvc.perform(get("/cars/1").accept(APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
+
+
+
+
+
+
+
 
     @Test
     public void shouldPutCarOnSale() throws Exception {
@@ -153,17 +148,59 @@ public class CarsControllerIntegrationTest {
         assertThat(contentAsString).isEqualTo("1");
     }
 
+    @Test
+    public void shouldRejectDeal() throws Exception {
+
+        mockMvc.perform(post("/rejectDeal")
+                .param("dealId","1")
+                .contentType(APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(status().isOk());
+
+        verify(carService).rejectDeal(1L);
+    }
+
+    @Test
+    public void chooseBestDeal() throws Exception {
+        when(carService.chooseBestDealByAdvertId(1L)).thenReturn(2L);
+        String advertId = mockMvc.perform(get("/bestDeal")
+                .param("advertId", "1")
+                .contentType(APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        verify(carService).chooseBestDealByAdvertId(1);
+
+        assertThat(Long.valueOf(advertId)).isEqualTo(2L);
+
+    }
+
+
+@Test
+public void shouldCreateDeal(){
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     private CarOnSaleRequest constructPutCarOnSaleRequest() {
         return  CarOnSaleRequest
                 .builder()
- //               .brand("ford")
- //               .model("fiesta")
- //               .plateNumber("12-22")
-  //              .year(1212)
-  //              .color("green")
-  //              .name("Andrey")
- ///               .sureName("Sevruk")
-  //              .phoneNumber("093")
+                .car(new Car("ford","fiesta", "12-22", "green", 1212))
+                .client(new Client("Andrey", "Sevruk", "093"))
                 .price(1000)
                 .build();
     }

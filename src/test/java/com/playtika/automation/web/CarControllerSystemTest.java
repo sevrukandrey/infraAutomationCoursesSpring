@@ -53,31 +53,6 @@ public class CarControllerSystemTest {
     }
 
     @Test
-    public void shouldPutCarOnSale() throws Exception {
-        String putCarForSale = "{\"brand\": \"ford\",\"model\":\"fiesta\",\"plateNumber\":\"12-22\"," +
-                "\"year\":\"1212\",\"color\":\"green\"," +
-                "\"name\":\"Andrey\",\"sureName\":\"Sevruk\",\"phoneNumber\":\"093\",\"price\":\"1000\"}";
-
-        String contentAsString = mockMvc.perform(put("/car")
-                .contentType(APPLICATION_JSON_UTF8_VALUE)
-                .content(putCarForSale))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE)).andReturn().getResponse().getContentAsString();
-
-        assertThat(Long.valueOf(contentAsString)).isEqualTo(2L);
-    }
-
-
-    @Test
-    public void shouldDeleteCarById() throws Exception {
-        Long id = postCar();
-
-        mockMvc.perform(delete("/cars/" + id)
-            .contentType(APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(status().isOk());
-    }
-
-    @Test
     public void shouldGetSaleInfoByCarId() throws Exception {
         Long id = postCar();
 
@@ -94,8 +69,68 @@ public class CarControllerSystemTest {
 
 
     @Test
+    public void shouldDeleteCarById() throws Exception {
+        Long id = postCar();
+
+        mockMvc.perform(delete("/cars/" + id)
+                .contentType(APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void shouldPutCarOnSale() throws Exception {
+        String putCarForSale = "{\"brand\": \"ford\",\"model\":\"fiesta\",\"plateNumber\":\"12-22\"," +
+                "\"year\":\"1212\",\"color\":\"green\"," +
+                "\"name\":\"Andrey\",\"sureName\":\"Sevruk\",\"phoneNumber\":\"093\",\"price\":\"1000\"}";
+
+        String contentAsString = mockMvc.perform(put("/car")
+                .contentType(APPLICATION_JSON_UTF8_VALUE)
+                .content(putCarForSale))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE)).andReturn().getResponse().getContentAsString();
+
+        assertThat(Long.valueOf(contentAsString)).isEqualTo(2L);
+    }
+
+
+
+
+    @Test
+    public long chooseBestDeal() throws Exception {
+
+        String id = mockMvc.perform(get("/bestDeal")
+                .contentType(APPLICATION_JSON_UTF8_VALUE)
+                .content("{}"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        return Long.valueOf(id);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @Test
     public void shouldRejectDealById() throws Exception {
         //add deal and get Id should implement endpoint
+
+
+
+
 
         mockMvc.perform(post("/rejectDeal/1")
                 .contentType(APPLICATION_JSON_UTF8_VALUE))

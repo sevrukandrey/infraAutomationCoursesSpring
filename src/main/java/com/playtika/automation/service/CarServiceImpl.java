@@ -78,7 +78,7 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public void rejectDeal(Long dealId) {
+    public void rejectDeal(long dealId) {
         DealEntity dealEntity = dealEntityRepository.findById(dealId);
 
         if (dealEntity == null) throw new DealNotFoundException(String.format("Deal with id %s not found", dealId));

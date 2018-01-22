@@ -31,7 +31,6 @@ public class CarsController {
         }
     }
 
-
     @ApiOperation(value = "Add a car to the cars shop")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Successfully add car"),
@@ -85,7 +84,7 @@ public class CarsController {
         }
     }
 
-    //TODO add swagger
+    @ApiOperation(value = "Reject deal by Id")
     @PostMapping(value = "/rejectDeal")
     public void rejectDeal(@RequestParam("dealId") long dealId) {
         carService.rejectDeal(dealId);
@@ -93,19 +92,19 @@ public class CarsController {
 
     }
 
-    //TODO add swagger
+    @ApiOperation(value = "Put car to sale")
     @PutMapping(value = "/car")
     public long putCarToSale(@RequestBody CarOnSaleRequest carOnSaleRequest) {
         return carService.putCarToSale(carOnSaleRequest);
     }
 
-    //TODO add swagger
+    @ApiOperation(value = "Choose best deal by advert id")
     @GetMapping(value = "/bestDeal")
     public long chooseBestDeal(@RequestParam("advertId") long advertId) {
         return carService.chooseBestDealByAdvertId(advertId);
     }
 
-    //TODO add swagger
+    @ApiOperation(value = "create deal for advert id")
     @PostMapping(value = "/deal")
     public long createDeal(@RequestBody DealRequest dealRequest,
                            @RequestParam("advertId") long advertId) {

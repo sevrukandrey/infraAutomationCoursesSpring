@@ -10,10 +10,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static java.lang.Long.valueOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
@@ -73,71 +75,105 @@ public class CarControllerSystemTest {
         Long id = postCar();
 
         mockMvc.perform(delete("/cars/" + id)
-                .contentType(APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(status().isOk());
+            .contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(status().isOk());
     }
+
+
 
     @Test
     public void shouldPutCarOnSale() throws Exception {
-        String putCarForSale = "{\"brand\": \"ford\",\"model\":\"fiesta\",\"plateNumber\":\"12-22\"," +
-                "\"year\":\"1212\",\"color\":\"green\"," +
-                "\"name\":\"Andrey\",\"sureName\":\"Sevruk\",\"phoneNumber\":\"093\",\"price\":\"1000\"}";
+        String putCarForSale = "{\"car\":{\"brand\":\"ford\",\"model\":\"fiesta\",\"plateNumber\":\"12-22\",\"color\":\"green\",\"year\":1212}," +
+            "\"client\":{\"name\":\"Andrey\",\"sureName\":\"Sevruk\",\"phoneNumber\":\"093\"}," +
+            "\"price\":1000.0}";
 
         String contentAsString = mockMvc.perform(put("/car")
-                .contentType(APPLICATION_JSON_UTF8_VALUE)
-                .content(putCarForSale))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE)).andReturn().getResponse().getContentAsString();
+            .contentType(APPLICATION_JSON_UTF8_VALUE)
+            .content(putCarForSale))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
 
-        assertThat(Long.valueOf(contentAsString)).isEqualTo(2L);
+        assertThat(valueOf(contentAsString)).isGreaterThan(0);
     }
-
-
-
 
     @Test
-    public long chooseBestDeal() throws Exception {
+    public void shouldChooseBestDeal() throws Exception {
+        long advertId = createAdvert();
+        long higherPriceDealId = createDealByAdvertIdWithPrice(advertId, 500);
+        createDealByAdvertIdWithPrice(advertId, 100);
 
-        String id = mockMvc.perform(get("/bestDeal")
-                .contentType(APPLICATION_JSON_UTF8_VALUE)
-                .content("{}"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        return Long.valueOf(id);
+        String bestDealId = mockMvc.perform(get("/bestDeal")
+            .contentType(APPLICATION_JSON_UTF8_VALUE)
+            .param("advertId", String.valueOf(advertId)))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+        assertThat(Long.valueOf(bestDealId)).isEqualTo(higherPriceDealId);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     @Test
     public void shouldRejectDealById() throws Exception {
-        //add deal and get Id should implement endpoint
+        long advertId = createAdvert();
+        long dealId = createDealByAdvertIdWithPrice(advertId, 500);
+
+        mockMvc.perform(post("/rejectDeal")
+            .contentType(APPLICATION_JSON_UTF8_VALUE)
+            .param("dealId", String.valueOf(dealId)))
+            .andDo(print())
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    public void shouldCreateDeal() throws Exception {
+        long advertId = createAdvert();
+
+        String dealId = mockMvc.perform(post("/deal")
+            .contentType(APPLICATION_JSON_UTF8_VALUE)
+            .content("{\"client\":{\"name\":\"Andrey\",\"sureName\":\"Sevruk\",\"phoneNumber\":\"093\"},\"price\":500.0}")
+            .param("advertId", String.valueOf(advertId)))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+        assertThat(Long.valueOf(dealId)).isGreaterThan(0);
+    }
 
 
+    private long createDealByAdvertIdWithPrice(long advertId, double price) throws Exception {
+        String id = mockMvc.perform(post("/deal")
+            .contentType(APPLICATION_JSON_UTF8_VALUE)
+            .content("{\"client\":{\"name\":\"Andrey\",\"sureName\":\"Sevruk\",\"phoneNumber\":\"093\"},\"price\":" + price + "}")
+            .param("advertId", String.valueOf(advertId)))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+        return Long.valueOf(id);
+    }
 
+    private long createAdvert() throws Exception {
+        String putCarForSale = "{\"car\":{\"brand\":\"ford\",\"model\":\"fiesta\",\"plateNumber\":\"12-22\",\"color\":\"green\",\"year\":1212}," +
+            "\"client\":{\"name\":\"Andrey\",\"sureName\":\"Sevruk\",\"phoneNumber\":\"093\"}," +
+            "\"price\":1000.0}";
 
-
-        mockMvc.perform(post("/rejectDeal/1")
-                .contentType(APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+        String advertId = mockMvc.perform(put("/car")
+            .contentType(APPLICATION_JSON_UTF8_VALUE)
+            .content(putCarForSale))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+        return (Long.valueOf(advertId));
     }
 
     private Long postCar() throws Exception {
@@ -151,6 +187,6 @@ public class CarControllerSystemTest {
             .andReturn()
             .getResponse()
             .getContentAsString();
-        return Long.valueOf(id);
+        return valueOf(id);
     }
 }

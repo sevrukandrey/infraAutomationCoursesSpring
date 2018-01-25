@@ -26,4 +26,6 @@ public interface CarService {
     long getAdvertIdByCarId(long carId);
 
     Car getCarIdByAdvertId(long advertId);
+
+    Deal getDealById(long dealId);
 }

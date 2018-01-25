@@ -125,6 +125,12 @@ public class CarsController {
         return carService.getCarIdByAdvertId(advertId);
     }
 
+    @ApiOperation(value = "Get deal by id")
+    @GetMapping(value = "/dealById")
+    public Deal dealById(@RequestParam("dealId") long dealId) {
+        return carService.getDealById(dealId);
+    }
+
 
     //return all adverds + by ID
     //return get by deal Id

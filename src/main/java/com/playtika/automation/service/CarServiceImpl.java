@@ -11,6 +11,7 @@ import com.playtika.automation.dao.entity.DealEntity;
 import com.playtika.automation.domain.*;
 import com.playtika.automation.web.exceptions.AdvertClosedException;
 import com.playtika.automation.web.exceptions.AdvertNotFoundException;
+import com.playtika.automation.web.exceptions.CarNotFoundException;
 import com.playtika.automation.web.exceptions.DealNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -81,7 +82,9 @@ public class CarServiceImpl implements CarService {
     public void rejectDeal(long dealId) {
         DealEntity dealEntity = dealEntityRepository.findById(dealId);
 
-        if (dealEntity == null) throw new DealNotFoundException(String.format("Deal with id %s not found", dealId));
+        if (dealEntity == null) {
+            throw new DealNotFoundException(String.format("Deal with id %s not found", dealId));
+        }
 
         dealEntity.setStatus(DealStatus.REJECTED);
 
@@ -94,14 +97,14 @@ public class CarServiceImpl implements CarService {
         ClientEntity clientEntity = getOrCreateClientEntity(carOnSaleRequest.getClient());
 
         return getOrCreateAdvertEntity(carEntity, clientEntity, carOnSaleRequest.getPrice())
-                .getId();
+            .getId();
     }
 
     @Override
     @Transactional
     public long chooseBestDealByAdvertId(long advertId) {
 
-        AdvertEntity advertEntity = isAdvertExist(advertId);
+        AdvertEntity advertEntity = findAndValidateAdvert(advertId);
 
         List<DealEntity> allDealByAdvertId = dealEntityRepository.findByAdvertId(advertId);
 
@@ -119,9 +122,9 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public long createDeal(DealRequest dealRequest, long advertId) {
-        AdvertEntity advertEntity = isAdvertExist(advertId);
+        AdvertEntity advertEntity = findAndValidateAdvert(advertId);
 
-        ClientEntity clientEntity= getOrCreateClientEntity(dealRequest.getClient());
+        ClientEntity clientEntity = getOrCreateClientEntity(dealRequest.getClient());
 
         return getOrCreateDealEntity(clientEntity, dealRequest.getPrice(), advertEntity);
     }
@@ -129,14 +132,22 @@ public class CarServiceImpl implements CarService {
     @Override
     public long getAdvertIdByCarId(long carId) {
 
-        AdvertEntity advertEntity = advertEntityRepository.findByCarId(carId)
-                .stream()
-                .filter(advertEntity1 -> advertEntity1.getStatus() == AdvertStatus.OPEN)
-                .findFirst().orElseThrow(() -> new AdvertNotFoundException(String.format("Open advert by car id %s not found", carId)));
-
-
+        AdvertEntity advertEntity = advertEntityRepository.findByCarIdAndStatus(carId, OPEN)
+            .stream()
+            .findFirst()
+            .orElseThrow(() -> new AdvertNotFoundException(String.format("Open advert by car id %s not found", carId)));
         return advertEntity.getId();
 
+    }
+
+    @Override
+    public Car getCarIdByAdvertId(long advertId) {
+        AdvertEntity advertEntity = advertEntityRepository.findById(advertId);
+        if (advertEntity == null) {
+            throw new CarNotFoundException(String.format("CarId by advertId %s not found", advertId));
+        }
+
+      return toCar(advertEntity.getCar());
 
     }
 
@@ -166,10 +177,10 @@ public class CarServiceImpl implements CarService {
 
     private AdvertEntity persistAdvertEntity(double price, CarEntity carEntity, ClientEntity clientEntity) {
         List<AdvertEntity> byCarIdAndStatus = advertEntityRepository.findByCarIdAndClientIdAndStatus(carEntity.getId(),
-                clientEntity.getId(), OPEN);
+            clientEntity.getId(), OPEN);
 
         return byCarIdAndStatus.isEmpty() ? createNewAdvert(price, carEntity, clientEntity)
-                : updateAdvert(byCarIdAndStatus.get(0), price);
+            : updateAdvert(byCarIdAndStatus.get(0), price);
     }
 
     private AdvertEntity updateAdvert(AdvertEntity advertEntity, double price) {
@@ -244,10 +255,10 @@ public class CarServiceImpl implements CarService {
 
     private AdvertEntity getOrCreateAdvertEntity(CarEntity carEntity, ClientEntity clientEntity, double price) {
         return advertEntityRepository.findByCarIdAndClientIdAndPriceAndStatus(carEntity.getId(), clientEntity.getId(),
-                price, OPEN)
-                .stream()
-                .findFirst()
-                .orElseGet(() -> persistAdvertEntity(price, carEntity, clientEntity));
+            price, OPEN)
+            .stream()
+            .findFirst()
+            .orElseGet(() -> persistAdvertEntity(price, carEntity, clientEntity));
     }
 
     private void closeAndSaveAdvert(AdvertEntity advertEntity, DealEntity dealWithHigherPrice) {
@@ -259,26 +270,28 @@ public class CarServiceImpl implements CarService {
 
     private void rejectDealWithLowerPrice(List<DealEntity> allDealByAdvertId) {
         allDealByAdvertId.stream()
-                .filter(dealEntity -> dealEntity.getStatus() != APPROVED)
-                .forEach(dealEntity -> dealEntity.setStatus(REJECTED));
+            .filter(dealEntity -> dealEntity.getStatus() != APPROVED)
+            .forEach(dealEntity -> dealEntity.setStatus(REJECTED));
     }
 
     private DealEntity getDealWithHigherPrice(List<DealEntity> allDealByAdvertId) {
         return allDealByAdvertId
-                .stream()
-                .filter(dealEntity -> dealEntity.getStatus() == ACTIVE)
-                .max(comparingDouble(DealEntity::getPrice))
-                .orElseThrow(() -> new DealNotFoundException("There is no Deal with Status Active"));
+            .stream()
+            .filter(dealEntity -> dealEntity.getStatus() == ACTIVE)
+            .max(comparingDouble(DealEntity::getPrice))
+            .orElseThrow(() -> new DealNotFoundException("There is no Deal with Status Active"));
     }
 
-    private AdvertEntity isAdvertExist(long advertId) {
+    private AdvertEntity findAndValidateAdvert(long advertId) {
         AdvertEntity advertEntity = advertEntityRepository.findById(advertId);
 
-        if(advertEntity == null)
+        if (advertEntity == null) {
             throw new AdvertNotFoundException(String.format("Advert with is %s not found", advertId));
-        if(advertEntity.getStatus() == AdvertStatus.CLOSED) {
-            throw  new AdvertClosedException(String.format("Advert with id %s is already closed", advertId));
         }
+        if (advertEntity.getStatus() == AdvertStatus.CLOSED) {
+            throw new AdvertClosedException(String.format("Advert with id %s is already closed", advertId));
+        }
+
         return advertEntity;
     }
 

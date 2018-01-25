@@ -20,14 +20,12 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.Collections;
 import java.util.List;
 
 import static com.playtika.automation.domain.AdvertStatus.CLOSED;
 import static com.playtika.automation.domain.AdvertStatus.OPEN;
 import static com.playtika.automation.domain.DealStatus.*;
 import static java.util.Arrays.asList;
-import static java.util.Collections.*;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
@@ -296,6 +294,8 @@ public class CarServiceImplTest {
 
     @Test
     public void shouldAddDeal(){
+
+        //user variables
         when(advertEntityRepository.findById(1L))
             .thenReturn(advertEntity);
 
@@ -315,11 +315,13 @@ public class CarServiceImplTest {
 
     @Test(expected = AdvertNotFoundException.class)
     public void shouldThrowAdvertNotFoundException() {
+        //add mock
        carService.createDeal(dealRequest, 1L);
     }
 
     @Test(expected = AdvertClosedException.class)
     public void shouldThrowAdvertClosedException() {
+        //use assertJ
         when(advertEntityRepository.findById(1L))
             .thenReturn(new AdvertEntity(1L,carEntity,clientEntity,1L,100,AdvertStatus.CLOSED));
 

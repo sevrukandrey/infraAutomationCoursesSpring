@@ -34,9 +34,9 @@ public class CarControllerSystemTest {
 
     @Test
     public void shouldAddCarAndReturnId() throws Exception {
-        Long id = postCar();
+        Long carId = postCar();
 
-        assertThat(id).isGreaterThan(0);
+        assertThat(carId).isGreaterThan(0);
 
     }
 
@@ -56,9 +56,9 @@ public class CarControllerSystemTest {
 
     @Test
     public void shouldGetSaleInfoByCarId() throws Exception {
-        Long id = postCar();
+        long carId = postCar();
 
-        mockMvc.perform(get("/cars/" + id)
+        mockMvc.perform(get("/cars/" + carId)
             .contentType(APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
             .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
@@ -72,11 +72,15 @@ public class CarControllerSystemTest {
 
     @Test
     public void shouldDeleteCarById() throws Exception {
-        Long id = postCar();
+        Long carId = postCar();
 
-        mockMvc.perform(delete("/cars/" + id)
+        mockMvc.perform(delete("/cars/" + carId)
             .contentType(APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk());
+
+        mockMvc.perform(get("/cars/" + carId)
+            .contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(status().isNotFound());
     }
 
 
@@ -86,7 +90,7 @@ public class CarControllerSystemTest {
             "\"client\":{\"name\":\"Andrey\",\"sureName\":\"Sevruk\",\"phoneNumber\":\"093\"}," +
             "\"price\":1000.0}";
 
-        String contentAsString = mockMvc.perform(put("/car")
+        String advertIdResponse = mockMvc.perform(put("/car")
             .contentType(APPLICATION_JSON_UTF8_VALUE)
             .content(putCarForSale))
             .andExpect(status().isOk())
@@ -95,7 +99,16 @@ public class CarControllerSystemTest {
             .getResponse()
             .getContentAsString();
 
-        assertThat(valueOf(contentAsString)).isGreaterThan(0);
+        mockMvc.perform(get("/carByAdvertId")
+            .contentType(APPLICATION_JSON_UTF8_VALUE)
+            .param("advertId", advertIdResponse))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.year", is(1212)))
+            .andExpect(jsonPath("$.color", is("green")))
+            .andExpect(jsonPath("$.plateNumber", is("12-22")))
+            .andExpect(jsonPath("$.model", is("fiesta")))
+            .andExpect(jsonPath("$.brand", is("ford")));
+
     }
 
     @Test
@@ -116,6 +129,7 @@ public class CarControllerSystemTest {
         assertThat(Long.valueOf(bestDealId)).isEqualTo(higherPriceDealId);
     }
 
+    //TODO get deals by id
     @Test
     public void shouldRejectDealById() throws Exception {
         long advertId = createAdvert();
@@ -129,6 +143,7 @@ public class CarControllerSystemTest {
     }
 
     @Test
+    //TODO get deals by id
     public void shouldCreateDeal() throws Exception {
         long advertId = createAdvert();
 

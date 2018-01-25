@@ -12,8 +12,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.ArrayList;
-
+import static java.lang.Long.valueOf;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,24 +37,29 @@ public class CarsControllerIntegrationTest {
     @MockBean
     private CarService carService;
 
+    private double price = 1000.0;
+    private String ownerContacts = "Andrey";
+    private long carId = 1L;
+    private long advertId = 2L;
+    private long dealId = 3L;
+
+
     @Test
     public void shouldAddCar() throws Exception {
-        when(carService.addCar(constructCar(), 1000, "Andrey")).thenReturn(1L);
+        when(carService.addCar(constructCar(), price, ownerContacts)).thenReturn(carId);
 
-        String contentAsString = mockMvc.perform(post("/cars")
-                .contentType(APPLICATION_JSON_UTF8_VALUE)
-                .content("{\"brand\": \"ford\",\"model\":\"fiesta\",\"plateNumber\":\"12-22\",\"year\":\"1212\",\"color\":\"green\"}")
-                .param("price", "1000")
-                .param("ownerContacts", "Andrey"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+        String carIdResponse = mockMvc.perform(post("/cars")
+            .contentType(APPLICATION_JSON_UTF8_VALUE)
+            .content("{\"brand\": \"ford\",\"model\":\"fiesta\",\"plateNumber\":\"12-22\",\"year\":\"1212\",\"color\":\"green\"}")
+            .param("price", String.valueOf(price))
+            .param("ownerContacts", ownerContacts))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
 
-        verify(carService).addCar(constructCar(), 1000, "Andrey");
-
-        assertThat(contentAsString).isEqualTo("1");
+        assertThat(valueOf(carIdResponse)).isEqualTo(carId);
     }
 
     @Test
@@ -62,178 +67,197 @@ public class CarsControllerIntegrationTest {
         when(carService.getAllCars()).thenReturn(singletonList(constructCarsForSale()));
 
         mockMvc.perform(get("/cars")
-                .contentType(APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andExpect(jsonPath("$.[0].id", is(1)))
-                .andExpect(jsonPath("$.[0]car.model", is("fiesta")))
-                .andExpect(jsonPath("$.[0]car.brand", is("ford")))
-                .andExpect(jsonPath("$.[0]saleInfo.price", is(1000.0)))
-                .andExpect(jsonPath("$.[0]saleInfo.ownerContacts", is("Andrey")));
+            .contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType("application/json;charset=UTF-8"))
+            .andExpect(jsonPath("$.[0].id", is(1)))
+            .andExpect(jsonPath("$.[0]car.model", is("fiesta")))
+            .andExpect(jsonPath("$.[0]car.brand", is("ford")))
+            .andExpect(jsonPath("$.[0]saleInfo.price", is(1000.0)))
+            .andExpect(jsonPath("$.[0]saleInfo.ownerContacts", is("Andrey")));
 
         verify(carService).getAllCars();
     }
 
     @Test
     public void shouldSuccessfullyResponseIfGetAllCarsEmpty() throws Exception {
-        when(carService.getAllCars()).thenReturn(new ArrayList<>());
+        when(carService.getAllCars()).thenReturn(emptyList());
 
         mockMvc.perform(get("/cars")
-                .contentType(APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"));
+            .contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType("application/json;charset=UTF-8"));
 
         verify(carService).getAllCars();
     }
 
     @Test
     public void shouldDeleteCar() throws Exception {
-        mockMvc.perform(delete("/cars/1")
-                .contentType(APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(status().isOk());
+        doNothing().when(carService).deleteCar(carId);
 
-        verify(carService).deleteCar(1L);
+        mockMvc.perform(delete("/cars/" + carId)
+            .contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(status().isOk());
+
+        verify(carService).deleteCar(carId);
     }
 
     @Test
     public void shouldReturnCarSaleInfo() throws Exception {
-        SaleInfo carInfo = new SaleInfo("Andrey", 1000.0);
+        SaleInfo carInfo = new SaleInfo(ownerContacts, price);
 
-        when(carService.getSaleInfo(1L)).thenReturn(of(carInfo));
+        when(carService.getSaleInfo(carId)).thenReturn(of(carInfo));
 
-        mockMvc.perform(get("/cars/1")
-                .contentType(APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andExpect(jsonPath("$.ownerContacts", is("Andrey")))
-                .andExpect(jsonPath("$.price", is(1000.0)));
+        mockMvc.perform(get("/cars/" + carId)
+            .contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType("application/json;charset=UTF-8"))
+            .andExpect(jsonPath("$.ownerContacts", is(ownerContacts)))
+            .andExpect(jsonPath("$.price", is(price)));
 
-        verify(carService).getSaleInfo(1);
+        verify(carService).getSaleInfo(carId);
     }
 
     @Test
-    public void shouldReturnNotFoundIfCarSaleInfoIsEmpty() throws Exception {
-        mockMvc.perform(get("/cars/1").accept(APPLICATION_JSON))
-                .andExpect(status().isNotFound());
-    }
+    public void shouldReturnNotFoundIfCarNotFound() throws Exception {
+        when(carService.getSaleInfo(carId)).thenReturn(null);
 
+        mockMvc.perform(get("/cars/" + carId)
+            .accept(APPLICATION_JSON))
+            .andExpect(status().isNotFound());
+    }
 
     @Test
     public void shouldPutCarOnSale() throws Exception {
         CarOnSaleRequest carOnSaleRequest = constructPutCarOnSaleRequest();
 
-        when(carService.putCarToSale(carOnSaleRequest)).thenReturn(1L);
+        when(carService.putCarToSale(carOnSaleRequest)).thenReturn(advertId);
 
-        String advertId = mockMvc.perform(put("/car")
-                .contentType(APPLICATION_JSON_UTF8_VALUE)
-                .content(
-                        "{\"car\":{\"brand\":\"ford\",\"model\":\"fiesta\",\"plateNumber\":\"12-22\",\"color\":\"green\",\"year\":1212}," +
-                                "\"client\":{\"name\":\"Andrey\",\"sureName\":\"Sevruk\",\"phoneNumber\":\"093\"}," +
-                                "\"price\":1000.0}"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+        String advertIdResponse = mockMvc.perform(put("/car")
+            .contentType(APPLICATION_JSON_UTF8_VALUE)
+            .content(
+                "{\"car\":{\"brand\":\"ford\",\"model\":\"fiesta\",\"plateNumber\":\"12-22\",\"color\":\"green\",\"year\":1212}," +
+                    "\"client\":{\"name\":\"Andrey\",\"sureName\":\"Sevruk\",\"phoneNumber\":\"093\"}," +
+                    "\"price\":1000.0}"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
 
         verify(carService).putCarToSale(carOnSaleRequest);
 
-        assertThat(advertId).isEqualTo("1");
+        assertThat(valueOf(advertIdResponse)).isEqualTo(advertId);
     }
 
     @Test
     public void shouldRejectDeal() throws Exception {
-        mockMvc.perform(post("/rejectDeal")
-                .param("dealId", "1")
-                .contentType(APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(status().isOk());
+        doNothing().when(carService).rejectDeal(dealId);
 
-        verify(carService).rejectDeal(1L);
+        mockMvc.perform(post("/rejectDeal")
+            .param("dealId", String.valueOf(dealId))
+            .contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(status().isOk());
+
+        verify(carService).rejectDeal(dealId);
     }
 
     @Test
     public void chooseBestDeal() throws Exception {
-        when(carService.chooseBestDealByAdvertId(1L)).thenReturn(2L);
+        when(carService.chooseBestDealByAdvertId(advertId)).thenReturn(dealId);
 
-        String advertId = mockMvc.perform(get("/bestDeal")
-                .param("advertId", "1")
-                .contentType(APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        String dealIdResponse = mockMvc.perform(get("/bestDeal")
+            .param("advertId", String.valueOf(advertId))
+            .contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 
-        verify(carService).chooseBestDealByAdvertId(1);
-
-        assertThat(Long.valueOf(advertId)).isEqualTo(2L);
-
+        assertThat(valueOf(dealIdResponse)).isEqualTo(dealId);
     }
 
     @Test
     public void shouldCreateDeal() throws Exception {
         DealRequest dealRequest = new DealRequest(new Client("Andrey", "Sevruk", "093"), 500.0);
 
-        when(carService.createDeal(dealRequest, 1)).thenReturn(1L);
+        when(carService.createDeal(dealRequest, advertId)).thenReturn(dealId);
 
-        String dealID = mockMvc.perform(post("/deal")
-                .contentType(APPLICATION_JSON_UTF8_VALUE)
-                .content("{\"client\":{\"name\":\"Andrey\",\"sureName\":\"Sevruk\",\"phoneNumber\":\"093\"},\"price\":500.0}")
-                .param("advertId", "1"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+        String dealIdResponse = mockMvc.perform(post("/deal")
+            .contentType(APPLICATION_JSON_UTF8_VALUE)
+            .content("{\"client\":{\"name\":\"Andrey\",\"sureName\":\"Sevruk\",\"phoneNumber\":\"093\"},\"price\":500.0}")
+            .param("advertId", String.valueOf(advertId)))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
 
-        assertThat(dealID).isEqualTo("1");
+        assertThat(Long.valueOf(dealIdResponse)).isEqualTo(dealId);
     }
 
     @Test
-    public void shouldReturnExceptionIfDealIsNotFound() throws Exception {
-        doThrow(new DealNotFoundException("Deal not found")).when(carService).rejectDeal(101010L);
+    public void shouldReturn404IfDealIsNotFound() throws Exception {
+        doThrow(new DealNotFoundException("Deal not found"))
+            .when(carService).rejectDeal(dealId);
 
         mockMvc.perform(post("/rejectDeal")
-                .param("dealId", "101010")
-                .contentType(APPLICATION_JSON_UTF8_VALUE))
-                .andExpect(status()
-                        .isNotFound());
+            .param("dealId", String.valueOf(dealId))
+            .contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(status()
+                .isNotFound());
     }
 
     @Test
-    public void shouldReturnExceptionIfAdvertIsNotFound() throws Exception {
+    public void shouldReturn404IfAdvertIsNotFound() throws Exception {
         doThrow(new DealNotFoundException("Advert not found"))
-                .when(carService).putCarToSale(any(CarOnSaleRequest.class));
+            .when(carService).putCarToSale(any(CarOnSaleRequest.class));
 
         mockMvc.perform(put("/car")
-                .contentType(APPLICATION_JSON_UTF8_VALUE)
-                .content(
-                        "{\"car\":{\"brand\":\"ford\",\"model\":\"fiesta\",\"plateNumber\":\"12-22\",\"color\":\"green\",\"year\":1212}," +
-                                "\"client\":{\"name\":\"Andrey\",\"sureName\":\"Sevruk\",\"phoneNumber\":\"093\"}," +
-                                "\"price\":1000.0}"))
-                .andExpect(status().isNotFound());
+            .contentType(APPLICATION_JSON_UTF8_VALUE)
+            .content(
+                "{\"car\":{\"brand\":\"ford\",\"model\":\"fiesta\",\"plateNumber\":\"12-22\",\"color\":\"green\",\"year\":1212}," +
+                    "\"client\":{\"name\":\"Andrey\",\"sureName\":\"Sevruk\",\"phoneNumber\":\"093\"}," +
+                    "\"price\":1000.0}"))
+            .andExpect(status().isNotFound());
     }
 
     @Test
     public void shouldReturnAdvertIdByCarId() throws Exception {
-        Long carId = 1L;
-        when(carService.getAdvertIdByCarId(carId)).thenReturn(1L);
+        when(carService.getAdvertIdByCarId(carId)).thenReturn(advertId);
 
-        String advertId = mockMvc.perform(get("/advertByCarId")
-                .contentType(APPLICATION_JSON_UTF8_VALUE)
-                .param("carId", String.valueOf(carId)))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+        String advertIdResult = mockMvc.perform(get("/advertByCarId")
+            .contentType(APPLICATION_JSON_UTF8_VALUE)
+            .param("carId", String.valueOf(carId)))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
 
-        assertThat(advertId).isEqualTo("1");
+        assertThat(valueOf(advertIdResult)).isEqualTo(advertId);
+    }
+
+    @Test
+    public void shouldReturnCarByAdvertId() throws Exception {
+        when(carService.getCarIdByAdvertId(advertId)).thenReturn(constructCar());
+
+        String car = mockMvc.perform(get("/carByAdvertId")
+            .contentType(APPLICATION_JSON_UTF8_VALUE)
+            .param("advertId", String.valueOf(this.advertId)))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+        assertThat(car).isNotEmpty();
     }
 
     private CarOnSaleRequest constructPutCarOnSaleRequest() {
         return CarOnSaleRequest
-                .builder()
-                .car(new Car("ford", "fiesta", "12-22", "green", 1212))
-                .client(new Client("Andrey", "Sevruk", "093"))
-                .price(1000)
-                .build();
+            .builder()
+            .car(new Car("ford", "fiesta", "12-22", "green", 1212))
+            .client(new Client("Andrey", "Sevruk", "093"))
+            .price(1000)
+            .build();
     }
 
     private Car constructCar() {

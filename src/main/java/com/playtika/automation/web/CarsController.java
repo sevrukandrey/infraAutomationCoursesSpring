@@ -111,7 +111,6 @@ public class CarsController {
         long dealId = carService.createDeal(dealRequest, advertId);
         log.info("Deal with id [dealId: {}] was created", dealId);
         return dealId;
-
     }
 
     @ApiOperation(value = "Get advertId by Car id")
@@ -120,4 +119,13 @@ public class CarsController {
         return carService.getAdvertIdByCarId(carId);
     }
 
+    @ApiOperation(value = "Get carId by AdvertId")
+    @GetMapping(value = "/carByAdvertId")
+    public Car getCarByAdvertId(@RequestParam("advertId") long advertId) {
+        return carService.getCarIdByAdvertId(advertId);
+    }
+
+
+    //return all adverds + by ID
+    //return get by deal Id
 }

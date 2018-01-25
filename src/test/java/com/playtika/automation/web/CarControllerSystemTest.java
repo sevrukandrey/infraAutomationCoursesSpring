@@ -168,7 +168,7 @@ public class CarControllerSystemTest {
                 .param("dealId", String.valueOf(dealId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", is("ACTIVE")))
-                .andExpect(jsonPath("$.id", is(dealId)));
+                .andExpect(jsonPath("$.id", is(String.valueOf(dealId))));
 
     }
 

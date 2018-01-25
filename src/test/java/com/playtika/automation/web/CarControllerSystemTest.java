@@ -129,7 +129,6 @@ public class CarControllerSystemTest {
         assertThat(Long.valueOf(bestDealId)).isEqualTo(higherPriceDealId);
     }
 
-    //TODO get deals by id
     @Test
     public void shouldRejectDealById() throws Exception {
         long advertId = createAdvert();
@@ -140,6 +139,15 @@ public class CarControllerSystemTest {
             .param("dealId", String.valueOf(dealId)))
             .andDo(print())
             .andExpect(status().isOk());
+
+        mockMvc.perform(get("/dealById")
+                .contentType(APPLICATION_JSON_UTF8_VALUE)
+                .param("dealId", String.valueOf(dealId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status", is("REJECTED")));
+
+
+
     }
 
     @Test

@@ -114,4 +114,10 @@ public class CarsController {
 
     }
 
+    @ApiOperation(value = "Get advertId by Car id")
+    @GetMapping(value = "/advertByCarId")
+    public long getAdvertIdByCarId(@RequestParam("carId") long carId) {
+        return carService.getAdvertIdByCarId(carId);
+    }
+
 }

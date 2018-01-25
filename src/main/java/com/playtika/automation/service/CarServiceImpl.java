@@ -126,6 +126,18 @@ public class CarServiceImpl implements CarService {
         return getOrCreateDealEntity(clientEntity, dealRequest.getPrice(), advertEntity);
     }
 
+    @Override
+    public long getAdvertIdByCarId(long carId) {
+        AdvertEntity advertEntity = advertEntityRepository.findByCarId(carId);
+
+        if(advertEntity == null)
+            throw new AdvertNotFoundException(String.format("Advert with carId %s not found", carId));
+
+        return advertEntity.getId();
+
+
+    }
+
     private long getOrCreateDealEntity(ClientEntity clientEntity, double price, AdvertEntity advertEntity) {
         return dealEntityRepository.findByAdvertIdAndBuyerIdAndPriceAndStatus(advertEntity.getId(), clientEntity.getId(), price, ACTIVE)
             .stream()

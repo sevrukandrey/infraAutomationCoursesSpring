@@ -80,7 +80,6 @@ public class CarControllerSystemTest {
     }
 
 
-
     @Test
     public void shouldPutCarOnSale() throws Exception {
         String putCarForSale = "{\"car\":{\"brand\":\"ford\",\"model\":\"fiesta\",\"plateNumber\":\"12-22\",\"color\":\"green\",\"year\":1212}," +
@@ -144,6 +143,23 @@ public class CarControllerSystemTest {
             .getContentAsString();
 
         assertThat(Long.valueOf(dealId)).isGreaterThan(0);
+    }
+
+    @Test
+    public void shouldReturnAdvertIdByCarId() throws Exception {
+        Long id = postCar();
+
+        String advertId = mockMvc.perform(get("/advertByCarId")
+            .contentType(APPLICATION_JSON_UTF8_VALUE)
+            .param("carId", String.valueOf(id)))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+        assertThat(Long.valueOf(advertId)).isGreaterThan(0);
+
     }
 
 

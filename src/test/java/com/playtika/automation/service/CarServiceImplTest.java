@@ -27,6 +27,7 @@ import static com.playtika.automation.domain.AdvertStatus.CLOSED;
 import static com.playtika.automation.domain.AdvertStatus.OPEN;
 import static com.playtika.automation.domain.DealStatus.*;
 import static java.util.Arrays.asList;
+import static java.util.Collections.*;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
@@ -38,7 +39,6 @@ import static org.mockito.Mockito.*;
 public class CarServiceImplTest {
 
     private Car car;
-    private Client client;
     private SaleInfo saleInfo;
     private AdvertEntity advertEntity;
     private CarEntity carEntity;
@@ -76,7 +76,7 @@ public class CarServiceImplTest {
     public void init() {
         carService = new CarServiceImpl(carEntityRepository, clientEntityRepository, advertEntityRepository, dealEntityRepository);
         car = new Car("ford", "fiesta", "12-12", "green", 2016);
-        client = new Client("Andrey", "Sevruk", "093");
+        Client client = new Client("Andrey", "Sevruk", "093");
         saleInfo = new SaleInfo("093", 1000.0);
         carEntity = constructCarEntity(car);
         clientEntity = constructClientEntity(client);
@@ -168,7 +168,6 @@ public class CarServiceImplTest {
         verify(advertEntityRepository, never()).save(any(AdvertEntity.class));
     }
 
-
     @Test
     public void shouldRejectByDealId() {
         when(dealEntityRepository.findById(1L)).thenReturn(dealEntity);
@@ -186,8 +185,6 @@ public class CarServiceImplTest {
 
         carService.rejectDeal(1L);
     }
-
-
 
     @Test
     public void shouldPutCarForSale() {
@@ -302,7 +299,7 @@ public class CarServiceImplTest {
         when(advertEntityRepository.findById(1L))
             .thenReturn(advertEntity);
 
-        when(clientEntityRepository.findByPhoneNumber(dealRequest.getClient().getPhoneNumber())).thenReturn(Collections.singletonList(clientEntity));
+        when(clientEntityRepository.findByPhoneNumber(dealRequest.getClient().getPhoneNumber())).thenReturn(singletonList(clientEntity));
 
         when(dealEntityRepository.findByAdvertIdAndBuyerIdAndPriceAndStatus(advertEntity.getId(), clientEntity.getId(), 500, ACTIVE))
             .thenReturn(emptyList());
@@ -328,6 +325,24 @@ public class CarServiceImplTest {
 
         carService.createDeal(dealRequest, 1L);
     }
+
+    @Test
+    public void shouldReturnAdvertIdByCarId() {
+        long carId =1;
+        when(advertEntityRepository.findByCarId(carId)).thenReturn(singletonList(advertEntity));
+
+        assertThat(carService.getAdvertIdByCarId(carId)).isEqualTo(advertEntity.getId());
+    }
+
+    @Test(expected = AdvertNotFoundException.class)
+    public void shouldReturnExceptionWhenAdvertByCarIdIsClosed() {
+        long carId =1;
+        when(advertEntityRepository.findByCarId(carId))
+                .thenReturn(singletonList(new AdvertEntity(1L,carEntity,clientEntity,1L,100,AdvertStatus.CLOSED)));
+
+        assertThat(carService.getAdvertIdByCarId(carId)).isEqualTo(advertEntity.getId());
+    }
+
 
 
     private AdvertEntity constructAdvertEntity(CarEntity carEntity, ClientEntity clientEntity) {

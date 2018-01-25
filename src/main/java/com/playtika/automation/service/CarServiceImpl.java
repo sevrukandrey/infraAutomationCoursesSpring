@@ -128,10 +128,12 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public long getAdvertIdByCarId(long carId) {
-        AdvertEntity advertEntity = advertEntityRepository.findByCarId(carId);
 
-        if(advertEntity == null)
-            throw new AdvertNotFoundException(String.format("Advert with carId %s not found", carId));
+        AdvertEntity advertEntity = advertEntityRepository.findByCarId(carId)
+                .stream()
+                .filter(advertEntity1 -> advertEntity1.getStatus() == AdvertStatus.OPEN)
+                .findFirst().orElseThrow(() -> new AdvertNotFoundException(String.format("Open advert by car id %s not found", carId)));
+
 
         return advertEntity.getId();
 

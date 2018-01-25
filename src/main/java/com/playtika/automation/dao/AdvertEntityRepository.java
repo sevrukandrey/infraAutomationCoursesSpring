@@ -20,5 +20,5 @@ public interface AdvertEntityRepository extends JpaRepository<AdvertEntity, Long
 
     AdvertEntity findById(Long id);
 
-    AdvertEntity findByCarId(long carId);
+    List<AdvertEntity> findByCarId(long carId);
 }

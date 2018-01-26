@@ -61,7 +61,6 @@ public class CarControllerSystemTest {
         mockMvc.perform(get("/cars/" + carId)
             .contentType(APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.ownerContacts", is("Andrey")))
             .andExpect(jsonPath("$.price", is(1000.0)));
     }
@@ -116,7 +115,6 @@ public class CarControllerSystemTest {
             .contentType(APPLICATION_JSON_UTF8_VALUE)
             .param("advertId", String.valueOf(advertId)))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
             .andReturn()
             .getResponse()
             .getContentAsString();
@@ -171,7 +169,6 @@ public class CarControllerSystemTest {
             .contentType(APPLICATION_JSON_UTF8_VALUE)
             .param("carId", String.valueOf(id)))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
             .andReturn()
             .getResponse()
             .getContentAsString();
@@ -180,7 +177,6 @@ public class CarControllerSystemTest {
             .contentType(APPLICATION_JSON_UTF8_VALUE)
             .param("advertId", advertId))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.model", is("fiesta")))
             .andExpect(jsonPath("$.brand", is("Ford")));
     }

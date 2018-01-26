@@ -314,8 +314,7 @@ public class CarServiceImplTest {
     public void shouldThrowExceptionIfDealNotFond() {
         when(advertEntityRepository.findById(advertId))
             .thenReturn(advertEntity);
-
-        //add dDER return null
+        when(dealEntityRepository.findById(any())).thenReturn(null);
 
         assertThatThrownBy(() -> carService.chooseBestDealByAdvertId(advertId))
             .isInstanceOf(DealNotFoundException.class);

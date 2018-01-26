@@ -44,7 +44,6 @@ public class CarsControllerIntegrationTest {
     private long advertId = 2L;
     private long dealId = 3L;
 
-
     @Test
     public void shouldAddCar() throws Exception {
         when(carService.addCar(constructCar(), price, ownerContacts)).thenReturn(carId);
@@ -84,10 +83,9 @@ public class CarsControllerIntegrationTest {
     public void shouldSuccessfullyResponseIfGetAllCarsEmpty() throws Exception {
         when(carService.getAllCars()).thenReturn(emptyList());
 
-        mockMvc.perform(get("/cars")
-                .contentType(APPLICATION_JSON_UTF8_VALUE))
+        mockMvc.perform(get("/cars"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json;charset=UTF-8"));
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE));
 
         verify(carService).getAllCars();
     }
@@ -264,13 +262,14 @@ public class CarsControllerIntegrationTest {
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.id", is(3)))
                 .andExpect(jsonPath("$.price", is(500.0)))
-                .andExpect(jsonPath("$.advertId", is(4)))
                 .andExpect(jsonPath("$.status", is("ACTIVE")));
 
     }
 
+
+
     private Deal constructDeal() {
-        return new Deal(3L, client, 500.0, 4L, DealStatus.ACTIVE);
+        return new Deal(3L, client, 500.0, null, DealStatus.ACTIVE);
     }
 
     private CarOnSaleRequest constructPutCarOnSaleRequest() {

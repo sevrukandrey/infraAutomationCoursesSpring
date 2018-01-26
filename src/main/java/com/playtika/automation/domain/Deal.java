@@ -9,12 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Deal {
-
-    private long id;
+    private Long id;
     private Client client;
     private double price;
-    private long advertId;
+    private Advert advert;
     private DealStatus status;
-
-
 }

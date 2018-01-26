@@ -119,7 +119,7 @@ public class CarsController {
         return carService.getAdvertIdByCarId(carId);
     }
 
-    @ApiOperation(value = "Get carId by AdvertId")
+    @ApiOperation(value = "Get car by AdvertId")
     @GetMapping(value = "/carByAdvertId")
     public Car getCarByAdvertId(@RequestParam("advertId") long advertId) {
         return carService.getCarIdByAdvertId(advertId);
@@ -131,7 +131,4 @@ public class CarsController {
         return carService.getDealById(dealId);
     }
 
-
-    //return all adverds + by ID
-    //return get by deal Id
 }

@@ -11,6 +11,7 @@ import com.playtika.automation.dao.entity.DealEntity;
 import com.playtika.automation.domain.*;
 import com.playtika.automation.web.exceptions.AdvertClosedException;
 import com.playtika.automation.web.exceptions.AdvertNotFoundException;
+import com.playtika.automation.web.exceptions.CarNotFoundException;
 import com.playtika.automation.web.exceptions.DealNotFoundException;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +31,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -44,7 +46,11 @@ public class CarServiceImplTest {
     private ClientEntity clientEntity;
     private CarOnSaleRequest carOnSaleRequest;
     private DealRequest dealRequest;
-
+    private long carId = 1L;
+    private long dealId = 2L;
+    private String ownerContacts = "093";
+    private double price = 1000.0;
+    private long advertId = 3L;
     private CarService carService;
 
     @Mock
@@ -55,7 +61,6 @@ public class CarServiceImplTest {
 
     @Mock
     private AdvertEntityRepository advertEntityRepository;
-
 
     @Mock
     private DealEntityRepository dealEntityRepository;
@@ -75,13 +80,28 @@ public class CarServiceImplTest {
         carService = new CarServiceImpl(carEntityRepository, clientEntityRepository, advertEntityRepository, dealEntityRepository);
         car = new Car("ford", "fiesta", "12-12", "green", 2016);
         Client client = new Client("Andrey", "Sevruk", "093");
-        saleInfo = new SaleInfo("093", 1000.0);
+        saleInfo = new SaleInfo(ownerContacts, price);
         carEntity = constructCarEntity(car);
         clientEntity = constructClientEntity(client);
         advertEntity = constructAdvertEntity(carEntity, clientEntity);
         dealEntity = constructDealEntity();
-        carOnSaleRequest = new CarOnSaleRequest(car, client, 100);
-        dealRequest = new DealRequest(client, 500);
+        carOnSaleRequest = new CarOnSaleRequest(car, client, price);
+        dealRequest = new DealRequest(client, price);
+    }
+
+    @Test
+    public void shouldAddCar() {
+
+        when(carEntityRepository.findByPlateNumber(car.getPlateNumber())).thenReturn(emptyList());
+        when(clientEntityRepository.findByPhoneNumber(saleInfo.getOwnerContacts())).thenReturn(emptyList());
+
+        when(carEntityRepository.save(any(CarEntity.class))).thenReturn(carEntity);
+        when(clientEntityRepository.save(any(ClientEntity.class))).thenReturn(clientEntity);
+        when(advertEntityRepository.save(any(AdvertEntity.class))).thenReturn(advertEntity);
+
+        long carIdResponse = carService.addCar(car, price, ownerContacts);
+
+        assertThat(carIdResponse).isEqualTo(carId);
     }
 
     @Test
@@ -98,90 +118,31 @@ public class CarServiceImplTest {
     }
 
     @Test
-    public void shouldReturnEmptyListIfThereAreNoCarsInDB() {
-        when(advertEntityRepository.findByStatus(OPEN)).thenReturn(emptyList());
-
-        assertThat(carService.getAllCars())
-            .isEmpty();
-    }
-
-    @Test
     public void shouldDeleteCarById() {
-        carService.deleteCar(1L);
+        carService.deleteCar(carId);
 
-        verify(advertEntityRepository).deleteByCarId(1L);
+        verify(advertEntityRepository).deleteByCarId(carId);
     }
 
     @Test
     public void shouldGetCarSaleInfoById() {
 
-        when(advertEntityRepository.findByCarIdAndStatus(1L, OPEN)).thenReturn(singletonList(advertEntity));
+        when(advertEntityRepository.findByCarIdAndStatus(carId, OPEN)).thenReturn(singletonList(advertEntity));
 
-        assertThat(carService.getSaleInfo(1L))
-            .isEqualTo(of(new SaleInfo("093", 1000.0)));
+        assertThat(carService.getSaleInfo(carId))
+            .isEqualTo(of(new SaleInfo(ownerContacts, price)));
     }
 
-    @Test
-    public void shouldAddCar() {
-
-        when(carEntityRepository.findByPlateNumber(car.getPlateNumber())).thenReturn(emptyList());
-        when(clientEntityRepository.findByPhoneNumber(saleInfo.getOwnerContacts())).thenReturn(emptyList());
-
-        when(carEntityRepository.save(any(CarEntity.class))).thenReturn(carEntity);
-        when(clientEntityRepository.save(any(ClientEntity.class))).thenReturn(clientEntity);
-        when(advertEntityRepository.save(any(AdvertEntity.class))).thenReturn(advertEntity);
-
-        long id = carService.addCar(car, 100, "093");
-
-        assertThat(id).isEqualTo(1);
-    }
-
-    @Test
-    public void shouldNotSaveClientAndCarIfSameExist() {
-
-        when(carEntityRepository.findByPlateNumber(car.getPlateNumber())).thenReturn(singletonList(carEntity));
-        when(clientEntityRepository.findByPhoneNumber(saleInfo.getOwnerContacts())).thenReturn(singletonList(clientEntity));
-        when(advertEntityRepository.save(any(AdvertEntity.class))).thenReturn(advertEntity);
-
-        carService.addCar(car, 1000.0, "093");
-
-        verify(clientEntityRepository, never()).save(any(ClientEntity.class));
-        verify(carEntityRepository, never()).save(any(CarEntity.class));
-    }
-
-    @Test
-    public void shouldNotSaveAdvertIfSameExist() {
-
-        when(carEntityRepository.findByPlateNumber(car.getPlateNumber())).thenReturn(singletonList(carEntity));
-        when(clientEntityRepository.findByPhoneNumber(saleInfo.getOwnerContacts())).thenReturn(singletonList(clientEntity));
-        when(advertEntityRepository.findByCarIdAndClientIdAndPriceAndStatus(carEntity.getId(),
-            clientEntity.getId(),
-            1000.0,
-            OPEN)).thenReturn(singletonList(advertEntity));
-
-        carService.addCar(car, 1000.0, "093");
-
-        verify(clientEntityRepository, never()).save(any(ClientEntity.class));
-        verify(carEntityRepository, never()).save(any(CarEntity.class));
-        verify(advertEntityRepository, never()).save(any(AdvertEntity.class));
-    }
 
     @Test
     public void shouldRejectByDealId() {
-        when(dealEntityRepository.findById(1L)).thenReturn(dealEntity);
+        when(dealEntityRepository.findById(dealId)).thenReturn(dealEntity);
         when(dealEntityRepository.save(dealEntityArgumentCaptor.capture())).thenReturn(dealEntity);
 
-        carService.rejectDeal(1L);
+        carService.rejectDeal(dealId);
 
         assertThat(dealEntityArgumentCaptor.getValue())
-            .isEqualToIgnoringNullFields(new DealEntity(1L, null, 200, null, REJECTED));
-    }
-
-    @Test(expected = DealNotFoundException.class)
-    public void shouldThrowExceptionIfDealByIdNotFound() {
-       when(dealEntityRepository.findById(1L)).thenReturn(null);
-
-        carService.rejectDeal(1L);
+            .isEqualToIgnoringNullFields(new DealEntity(dealId, null, 200, null, REJECTED));
     }
 
     @Test
@@ -203,6 +164,103 @@ public class CarServiceImplTest {
         when(advertEntityRepository.save(any(AdvertEntity.class))).thenReturn(advertEntity);
 
         assertThat(carService.putCarToSale(carOnSaleRequest)).isEqualTo(advertEntity.getId());
+    }
+
+
+    @Test
+    public void shouldChooseDealWithHigherPrice() {
+        Client client = new Client("vova", "petrov", "099");
+        ClientEntity secondClient = constructClientEntity(client);
+
+        DealEntity dealWithLowerPrice = new DealEntity(1L, clientEntity, 200, advertEntity, ACTIVE);
+        DealEntity dealWithHigherPrice = new DealEntity(2L, secondClient, 400, advertEntity, ACTIVE);
+
+        when(dealEntityRepository.findByAdvertId(advertId))
+            .thenReturn(asList(dealWithLowerPrice, dealWithHigherPrice));
+        when(dealEntityRepository.save(dealEntitiesArgumentCaptor.capture()))
+            .thenReturn(anyListOf(DealEntity.class));
+
+        when(advertEntityRepository.findById(advertId))
+            .thenReturn(advertEntity);
+        when(advertEntityRepository.save(advertEntityArgumentCaptor.capture()))
+            .thenReturn(any(AdvertEntity.class));
+
+        long dealId = carService.chooseBestDealByAdvertId(advertId);
+
+        assertThat(dealId).isEqualTo(dealWithHigherPrice.getId());
+
+        assertThat(dealEntitiesArgumentCaptor.getValue()).hasSize(2);
+        assertThat(dealEntitiesArgumentCaptor.getValue().get(0))
+            .isEqualToIgnoringNullFields(new DealEntity(1L, clientEntity, 200, advertEntity, REJECTED));
+        assertThat(dealEntitiesArgumentCaptor.getValue().get(1))
+            .isEqualToIgnoringNullFields(new DealEntity(2L, secondClient, 400, advertEntity, APPROVED));
+
+        assertThat(advertEntityArgumentCaptor.getValue())
+            .isEqualToIgnoringNullFields(new AdvertEntity(1L, carEntity, clientEntity, 2L, 1000, CLOSED));
+    }
+
+    @Test
+    public void shouldAddDeal() {
+
+        when(advertEntityRepository.findById(advertId))
+            .thenReturn(advertEntity);
+
+        when(clientEntityRepository.findByPhoneNumber(dealRequest.getClient().getPhoneNumber())).thenReturn(singletonList(clientEntity));
+
+        when(dealEntityRepository.findByAdvertIdAndBuyerIdAndPriceAndStatus(advertEntity.getId(), clientEntity.getId(), price, ACTIVE))
+            .thenReturn(emptyList());
+        when(dealEntityRepository.save(dealEntityArgumentCaptor.capture())).thenReturn(dealEntity);
+
+        long dealId = carService.createDeal(dealRequest, advertId);
+
+        assertThat(dealId).isEqualTo(dealEntity.getId());
+        assertThat(dealEntityArgumentCaptor.getValue())
+            .isEqualToComparingFieldByFieldRecursively(new DealEntity(clientEntity, price, advertEntity, ACTIVE));
+
+    }
+
+    @Test
+    public void shouldReturnAdvertIdByCarId() {
+        when(advertEntityRepository.findByCarIdAndStatus(carId, OPEN)).thenReturn(singletonList(advertEntity));
+
+        assertThat(carService.getAdvertIdByCarId(carId)).isEqualTo(advertEntity.getId());
+    }
+
+    @Test
+    public void shouldGetCarByAdverId() {
+        when(advertEntityRepository.findById(advertId)).thenReturn(advertEntity);
+
+        assertThat(carService.getCarIdByAdvertId(advertId)).isEqualToComparingFieldByFieldRecursively(advertEntity.getCar());
+    }
+
+    @Test
+    public void shouldNotSaveClientAndCarIfSameExist() {
+
+        when(carEntityRepository.findByPlateNumber(car.getPlateNumber())).thenReturn(singletonList(carEntity));
+        when(clientEntityRepository.findByPhoneNumber(saleInfo.getOwnerContacts())).thenReturn(singletonList(clientEntity));
+        when(advertEntityRepository.save(any(AdvertEntity.class))).thenReturn(advertEntity);
+
+        carService.addCar(car, price, ownerContacts);
+
+        verify(clientEntityRepository, never()).save(any(ClientEntity.class));
+        verify(carEntityRepository, never()).save(any(CarEntity.class));
+    }
+
+    @Test
+    public void shouldNotSaveAdvertIfSameExist() {
+
+        when(carEntityRepository.findByPlateNumber(car.getPlateNumber())).thenReturn(singletonList(carEntity));
+        when(clientEntityRepository.findByPhoneNumber(saleInfo.getOwnerContacts())).thenReturn(singletonList(clientEntity));
+        when(advertEntityRepository.findByCarIdAndClientIdAndPriceAndStatus(carEntity.getId(),
+            clientEntity.getId(),
+            price,
+            OPEN)).thenReturn(singletonList(advertEntity));
+
+        carService.addCar(car, price, ownerContacts);
+
+        verify(clientEntityRepository, never()).save(any(ClientEntity.class));
+        verify(carEntityRepository, never()).save(any(CarEntity.class));
+        verify(advertEntityRepository, never()).save(any(AdvertEntity.class));
     }
 
     @Test
@@ -244,107 +302,51 @@ public class CarServiceImplTest {
             carOnSaleRequest.getPrice(), OPEN));
     }
 
-
-
     @Test
-    public void shouldChooseDealWithHigherPrice() {
-        Client client = new Client("vova", "petrov", "099");
-        ClientEntity secondClient = constructClientEntity(client);
-
-        DealEntity dealWithLowerPrice = new DealEntity(1L, clientEntity, 200, advertEntity, ACTIVE);
-        DealEntity dealWithHigherPrice = new DealEntity(2L, secondClient, 400, advertEntity, ACTIVE);
-
-        when(dealEntityRepository.findByAdvertId(1L))
-            .thenReturn(asList(dealWithLowerPrice, dealWithHigherPrice));
-        when(dealEntityRepository.save(dealEntitiesArgumentCaptor.capture()))
-            .thenReturn(anyListOf(DealEntity.class));
-
-        when(advertEntityRepository.findById(1L))
-            .thenReturn(advertEntity);
-        when(advertEntityRepository.save(advertEntityArgumentCaptor.capture()))
-            .thenReturn(any(AdvertEntity.class));
-
-        long dealId = carService.chooseBestDealByAdvertId(1L);
-
-        assertThat(dealId).isEqualTo(dealWithHigherPrice.getId());
-
-        assertThat(dealEntitiesArgumentCaptor.getValue()).hasSize(2);
-        assertThat(dealEntitiesArgumentCaptor.getValue().get(0))
-            .isEqualToIgnoringNullFields(new DealEntity(1L, clientEntity, 200, advertEntity, REJECTED));
-        assertThat(dealEntitiesArgumentCaptor.getValue().get(1))
-            .isEqualToIgnoringNullFields(new DealEntity(2L, secondClient, 400, advertEntity, APPROVED));
-
-        assertThat(advertEntityArgumentCaptor.getValue())
-            .isEqualToIgnoringNullFields(new AdvertEntity(1L,carEntity,clientEntity,2L, 1000, CLOSED));
-    }
-
-    @Test(expected = AdvertNotFoundException.class)
     public void shouldThrowNotExceptionIfAdvertNotFound() {
-        carService.chooseBestDealByAdvertId(1L);
+        when(advertEntityRepository.findById(advertId)).thenReturn(null);
+
+        assertThatThrownBy(() -> carService.chooseBestDealByAdvertId(advertId))
+            .isInstanceOf(AdvertNotFoundException.class);
     }
 
-    @Test(expected = DealNotFoundException.class)
+    @Test
     public void shouldThrowExceptionIfDealNotFond() {
-        when(advertEntityRepository.findById(1L))
+        when(advertEntityRepository.findById(advertId))
             .thenReturn(advertEntity);
 
-        carService.chooseBestDealByAdvertId(1L);
-    }
+        //add dDER return null
 
-
-    @Test
-    public void shouldAddDeal(){
-
-        //user variables
-        when(advertEntityRepository.findById(1L))
-            .thenReturn(advertEntity);
-
-        when(clientEntityRepository.findByPhoneNumber(dealRequest.getClient().getPhoneNumber())).thenReturn(singletonList(clientEntity));
-
-        when(dealEntityRepository.findByAdvertIdAndBuyerIdAndPriceAndStatus(advertEntity.getId(), clientEntity.getId(), 500, ACTIVE))
-            .thenReturn(emptyList());
-        when(dealEntityRepository.save(dealEntityArgumentCaptor.capture())).thenReturn(dealEntity);
-
-        long dealId = carService.createDeal(dealRequest, 1L);
-
-        assertThat(dealId).isEqualTo(dealEntity.getId());
-        assertThat(dealEntityArgumentCaptor.getValue())
-            .isEqualToComparingFieldByFieldRecursively(new DealEntity(clientEntity, 500, advertEntity, ACTIVE));
-
-    }
-
-    @Test(expected = AdvertNotFoundException.class)
-    public void shouldThrowAdvertNotFoundException() {
-        //add mock
-       carService.createDeal(dealRequest, 1L);
-    }
-
-    @Test(expected = AdvertClosedException.class)
-    public void shouldThrowAdvertClosedException() {
-        //use assertJ
-        when(advertEntityRepository.findById(1L))
-            .thenReturn(new AdvertEntity(1L,carEntity,clientEntity,1L,100,AdvertStatus.CLOSED));
-
-        carService.createDeal(dealRequest, 1L);
+        assertThatThrownBy(() -> carService.chooseBestDealByAdvertId(advertId))
+            .isInstanceOf(DealNotFoundException.class);
     }
 
     @Test
-    public void shouldReturnAdvertIdByCarId() {
-        long carId =1;
-        when(advertEntityRepository.findByCarId(carId)).thenReturn(singletonList(advertEntity));
-
-        assertThat(carService.getAdvertIdByCarId(carId)).isEqualTo(advertEntity.getId());
-    }
-
-    @Test(expected = AdvertNotFoundException.class)
     public void shouldReturnExceptionWhenAdvertByCarIdIsClosed() {
-        long carId =1;
-        when(advertEntityRepository.findByCarId(carId))
-                .thenReturn(singletonList(new AdvertEntity(1L,carEntity,clientEntity,1L,100,AdvertStatus.CLOSED)));
+        when(advertEntityRepository.findByCarIdAndStatus(carId, CLOSED))
+            .thenReturn(null);
 
-        assertThat(carService.getAdvertIdByCarId(carId)).isEqualTo(advertEntity.getId());
+        assertThatThrownBy(() -> carService.getCarIdByAdvertId(advertId))
+            .isInstanceOf(CarNotFoundException.class);
     }
 
+    @Test
+    public void shouldThrowAdvertClosedException() {
+        when(advertEntityRepository.findById(advertId))
+            .thenReturn(new AdvertEntity(advertId, carEntity, clientEntity, dealId, price, CLOSED));
+
+        assertThatThrownBy(() -> carService.createDeal(dealRequest, advertId))
+            .isInstanceOf(AdvertClosedException.class);
+
+    }
+
+    @Test
+    public void shouldThrowExceptionIfDealByIdNotFound() {
+        when(dealEntityRepository.findById(dealId)).thenReturn(null);
+
+        assertThatThrownBy(() -> carService.rejectDeal(dealId))
+            .isInstanceOf(DealNotFoundException.class);
+    }
 
 
     private AdvertEntity constructAdvertEntity(CarEntity carEntity, ClientEntity clientEntity) {
@@ -370,7 +372,7 @@ public class CarServiceImplTest {
 
     private DealEntity constructDealEntity() {
         DealEntity dealEntity = new DealEntity();
-        dealEntity.setId(1L);
+        dealEntity.setId(2L);
         dealEntity.setStatus(ACTIVE);
         dealEntity.setPrice(200);
         return dealEntity;

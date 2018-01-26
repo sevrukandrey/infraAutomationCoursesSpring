@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Advert {
-    private long id;
+    private Long id;
     private Car car;
     private Client client;
-    private long dealId;
+    private Long dealId;
     private double price;
     private AdvertStatus status;
 }

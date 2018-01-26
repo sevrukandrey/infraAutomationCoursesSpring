@@ -167,7 +167,7 @@ public class CarServiceImpl implements CarService {
         Deal deal = new Deal();
         deal.setId(dealEntity.getId());
         deal.setClient(toClient(dealEntity.getBuyer()));
-        deal.setAdvertId(dealEntity.getAdvert().getId());
+        deal.setAdvert(toAdvert(dealEntity.getAdvert()));
         deal.setStatus(dealEntity.getStatus());
         deal.setPrice(dealEntity.getPrice());
         return deal;
@@ -179,6 +179,16 @@ public class CarServiceImpl implements CarService {
         client.setSureName(clientEntity.getSurname());
         client.setPhoneNumber(clientEntity.getPhoneNumber());
         return client;
+    }
+
+    private Advert toAdvert(AdvertEntity advertEntity) {
+        Advert advert = new Advert();
+        advert.setCar(toCar(advertEntity.getCar()));
+        advert.setClient(toClient(advertEntity.getClient()));
+        advert.setDealId(advertEntity.getDealId());
+        advert.setPrice(advertEntity.getPrice());
+        advert.setStatus(advertEntity.getStatus());
+        return advert;
     }
 
 

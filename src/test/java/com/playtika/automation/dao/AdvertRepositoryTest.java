@@ -21,8 +21,8 @@ public class AdvertRepositoryTest extends AbstractDaoTest {
 
     @Test
     @DataSet(value = "advert-by-status.xml",
-        useSequenceFiltering = false,
-        disableConstraints = true)
+            useSequenceFiltering = false,
+            disableConstraints = true)
     public void shouldFindAdvertByStatus() {
 
         CarEntity carEntity = new CarEntity("12-12", 2012, "green", "x5", "bmw");
@@ -40,9 +40,9 @@ public class AdvertRepositoryTest extends AbstractDaoTest {
 
     @Test
     @DataSet(
-        value = "advert-by-status-and-car-id.xml",
-        useSequenceFiltering = false,
-        disableConstraints = true)
+            value = "advert-by-status-and-car-id.xml",
+            useSequenceFiltering = false,
+            disableConstraints = true)
     public void shouldFindAdvertByCarIdAndStatus() {
         CarEntity carEntity = constructCarEntity();
         carEntity.setId(1L);
@@ -65,8 +65,8 @@ public class AdvertRepositoryTest extends AbstractDaoTest {
 
     @Test
     @DataSet(value = "advert-for-delete.xml",
-        useSequenceFiltering = false,
-        disableConstraints = true)
+            useSequenceFiltering = false,
+            disableConstraints = true)
     @ExpectedDataSet("expected-after-delete.xml")
     @Commit
     public void shouldDeleteByCarId() {
@@ -77,8 +77,8 @@ public class AdvertRepositoryTest extends AbstractDaoTest {
 
     @Test
     @DataSet(value = "empty-dataset.xml",
-        useSequenceFiltering = false,
-        disableConstraints = true)
+            useSequenceFiltering = false,
+            disableConstraints = true)
     @ExpectedDataSet("add-advert.xml")
     @Commit
     public void shouldAddAdvert() {
@@ -95,8 +95,8 @@ public class AdvertRepositoryTest extends AbstractDaoTest {
 
     @Test
     @DataSet(value = "add-advert.xml",
-        useSequenceFiltering = false,
-        disableConstraints = true)
+            useSequenceFiltering = false,
+            disableConstraints = true)
     public void shouldReturnEmptyListIfAdvertByStatusNotFound() {
         List<AdvertEntity> findByStatus = dao.findByStatus(AdvertStatus.CLOSED);
 
@@ -105,8 +105,8 @@ public class AdvertRepositoryTest extends AbstractDaoTest {
 
     @Test
     @DataSet(value = "add-advert.xml",
-        useSequenceFiltering = false,
-        disableConstraints = true)
+            useSequenceFiltering = false,
+            disableConstraints = true)
     public void shouldReturnEmptyListIfAdvertByStatusAndCarNotFound() {
         List<AdvertEntity> findByStatus = dao.findByCarIdAndStatus(2, AdvertStatus.CLOSED);
 
@@ -116,8 +116,8 @@ public class AdvertRepositoryTest extends AbstractDaoTest {
 
     @Test
     @DataSet(value = "advert-by-carid-clientid-status-price.xml",
-        useSequenceFiltering = false,
-        disableConstraints = true)
+            useSequenceFiltering = false,
+            disableConstraints = true)
     public void shouldFindByCarIdAndClientIdAndPriceAndStatus() {
         List<AdvertEntity> expectedAdvert =
                 dao.findByCarIdAndClientIdAndPriceAndStatus(1L, 1L, 200.0, AdvertStatus.OPEN);
@@ -132,10 +132,10 @@ public class AdvertRepositoryTest extends AbstractDaoTest {
 
     @Test
     @DataSet(value = "advert-by-carid-clientid-status.xml",
-        useSequenceFiltering = false,
-        disableConstraints = true)
+            useSequenceFiltering = false,
+            disableConstraints = true)
     public void findByCarIdAndClientIdAndStatus() {
-       List<AdvertEntity> expectedAdvert =
+        List<AdvertEntity> expectedAdvert =
                 dao.findByCarIdAndClientIdAndStatus(1L, 1L, AdvertStatus.OPEN);
 
         assertThat(expectedAdvert).hasSize(1);

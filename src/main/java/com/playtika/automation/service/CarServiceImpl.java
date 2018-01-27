@@ -25,9 +25,6 @@ import static com.playtika.automation.domain.DealStatus.*;
 import static java.util.Comparator.comparingDouble;
 import static java.util.stream.Collectors.toList;
 
-/**
- *
- */
 @Service
 public class CarServiceImpl implements CarService {
 
@@ -54,7 +51,6 @@ public class CarServiceImpl implements CarService {
         ClientEntity clientEntity = getOrCreateClientEntity(ownerContacts);
 
         AdvertEntity advertEntity = getOrCreateAdvertEntity(carEntity, clientEntity, price);
-
 
         return advertEntity.getCar().getId();
     }
@@ -106,7 +102,6 @@ public class CarServiceImpl implements CarService {
     @Override
     @Transactional
     public long chooseBestDealByAdvertId(long advertId) {
-
         AdvertEntity advertEntity = findAndValidateAdvert(advertId);
 
         List<DealEntity> allDealByAdvertId = dealEntityRepository.findByAdvertId(advertId);
@@ -134,13 +129,11 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public long getAdvertIdByCarId(long carId) {
-
         AdvertEntity advertEntity = advertEntityRepository.findByCarIdAndStatus(carId, OPEN)
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new AdvertNotFoundException(String.format("Open advert by car id %s not found", carId)));
         return advertEntity.getId();
-
     }
 
     @Override
@@ -151,7 +144,6 @@ public class CarServiceImpl implements CarService {
         }
 
         return toCar(advertEntity.getCar());
-
     }
 
     @Override
@@ -162,35 +154,6 @@ public class CarServiceImpl implements CarService {
         }
         return toDeal(dealEntity);
     }
-
-    private Deal toDeal(DealEntity dealEntity) {
-        Deal deal = new Deal();
-        deal.setId(dealEntity.getId());
-        deal.setClient(toClient(dealEntity.getBuyer()));
-        deal.setAdvert(toAdvert(dealEntity.getAdvert()));
-        deal.setStatus(dealEntity.getStatus());
-        deal.setPrice(dealEntity.getPrice());
-        return deal;
-    }
-
-    private Client toClient(ClientEntity clientEntity) {
-        Client client = new Client();
-        client.setName(clientEntity.getName());
-        client.setSureName(clientEntity.getSurname());
-        client.setPhoneNumber(clientEntity.getPhoneNumber());
-        return client;
-    }
-
-    private Advert toAdvert(AdvertEntity advertEntity) {
-        Advert advert = new Advert();
-        advert.setCar(toCar(advertEntity.getCar()));
-        advert.setClient(toClient(advertEntity.getClient()));
-        advert.setDealId(advertEntity.getDealId());
-        advert.setPrice(advertEntity.getPrice());
-        advert.setStatus(advertEntity.getStatus());
-        return advert;
-    }
-
 
     private long getOrCreateDealEntity(ClientEntity clientEntity, double price, AdvertEntity advertEntity) {
         return dealEntityRepository.findByAdvertIdAndBuyerIdAndPriceAndStatus(advertEntity.getId(), clientEntity.getId(), price, ACTIVE)
@@ -207,7 +170,6 @@ public class CarServiceImpl implements CarService {
         dealEntity.setPrice(price);
         return dealEntityRepository.save(dealEntity);
     }
-
 
     private CarEntity getOrCreateCarEntity(Car car) {
         return carEntityRepository.findByPlateNumber(car.getPlateNumber())
@@ -336,4 +298,31 @@ public class CarServiceImpl implements CarService {
         return advertEntity;
     }
 
+    private Deal toDeal(DealEntity dealEntity) {
+        Deal deal = new Deal();
+        deal.setId(dealEntity.getId());
+        deal.setClient(toClient(dealEntity.getBuyer()));
+        deal.setAdvert(toAdvert(dealEntity.getAdvert()));
+        deal.setStatus(dealEntity.getStatus());
+        deal.setPrice(dealEntity.getPrice());
+        return deal;
+    }
+
+    private Client toClient(ClientEntity clientEntity) {
+        Client client = new Client();
+        client.setName(clientEntity.getName());
+        client.setSureName(clientEntity.getSurname());
+        client.setPhoneNumber(clientEntity.getPhoneNumber());
+        return client;
+    }
+
+    private Advert toAdvert(AdvertEntity advertEntity) {
+        Advert advert = new Advert();
+        advert.setCar(toCar(advertEntity.getCar()));
+        advert.setClient(toClient(advertEntity.getClient()));
+        advert.setDealId(advertEntity.getDealId());
+        advert.setPrice(advertEntity.getPrice());
+        advert.setStatus(advertEntity.getStatus());
+        return advert;
+    }
 }

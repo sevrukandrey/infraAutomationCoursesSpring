@@ -45,9 +45,7 @@ public class CarsController {
                        @RequestParam("ownerContacts") String ownerContacts) {
 
         long id = carService.addCar(car, price, ownerContacts);
-
         log.info("addCar was finished [carId: {}; carInfo: {}]", id, car);
-
         return id;
     }
 
@@ -68,6 +66,7 @@ public class CarsController {
     @DeleteMapping(value = "/cars/{id}")
     public void deleteCar(@PathVariable("id") long id) {
         carService.deleteCar(id);
+        log.info("Car with %s was deleted", id);
     }
 
     @ApiOperation(value = "Get sale info for car by id", response = SaleInfo.class)
@@ -89,19 +88,22 @@ public class CarsController {
     public void rejectDeal(@RequestParam("dealId") long dealId) {
         carService.rejectDeal(dealId);
         log.info("Deal with id [dealId:{}] was rejected", dealId);
-
     }
 
     @ApiOperation(value = "Put car to sale")
     @PutMapping(value = "/car")
     public long putCarToSale(@RequestBody CarOnSaleRequest carOnSaleRequest) {
-        return carService.putCarToSale(carOnSaleRequest);
+        long advertId = carService.putCarToSale(carOnSaleRequest);
+        log.info("advert [advertId:{}] by [caronSaleRequest:{}] was created", advertId, carOnSaleRequest);
+        return advertId;
     }
 
     @ApiOperation(value = "Choose best deal by advert id")
     @GetMapping(value = "/bestDeal")
     public long chooseBestDeal(@RequestParam("advertId") long advertId) {
-        return carService.chooseBestDealByAdvertId(advertId);
+        long dealId = carService.chooseBestDealByAdvertId(advertId);
+        log.info("Best deal id is [dealId:{}] ", dealId);
+        return dealId;
     }
 
     @ApiOperation(value = "create deal for advert id")

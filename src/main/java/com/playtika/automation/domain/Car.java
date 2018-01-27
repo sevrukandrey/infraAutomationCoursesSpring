@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Car {
-
-    @ApiModelProperty(notes = "Car brand")
+    @ApiModelProperty(required = true, notes = "Car plate number")
     private  String brand;
     @ApiModelProperty(notes = "Car model")
     private  String model;

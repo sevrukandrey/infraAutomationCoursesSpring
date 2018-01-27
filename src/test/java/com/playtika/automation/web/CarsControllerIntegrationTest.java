@@ -248,7 +248,6 @@ public class CarsControllerIntegrationTest {
                 .andExpect(jsonPath("$.plateNumber", is("12-22")))
                 .andExpect(jsonPath("$.model", is("fiesta")))
                 .andExpect(jsonPath("$.brand", is("ford")));
-
     }
 
     @Test
@@ -263,10 +262,7 @@ public class CarsControllerIntegrationTest {
                 .andExpect(jsonPath("$.id", is(3)))
                 .andExpect(jsonPath("$.price", is(500.0)))
                 .andExpect(jsonPath("$.status", is("ACTIVE")));
-
     }
-
-
 
     private Deal constructDeal() {
         return new Deal(3L, client, 500.0, null, DealStatus.ACTIVE);
@@ -288,5 +284,4 @@ public class CarsControllerIntegrationTest {
     private CarSaleInfo constructCarsForSale() {
         return new CarSaleInfo(1, constructCar(), new SaleInfo("Andrey", 1000));
     }
-
 }

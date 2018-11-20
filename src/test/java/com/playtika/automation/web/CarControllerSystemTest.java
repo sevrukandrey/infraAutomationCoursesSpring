@@ -34,6 +34,9 @@ public class CarControllerSystemTest {
     @Autowired
     private MockMvc mockMvc;
 
+
+
+
     @MockBean
     private CarService carService;
 
@@ -51,13 +54,13 @@ public class CarControllerSystemTest {
         postCar();
 
         mockMvc.perform(get("/cars")
-                                .contentType(APPLICATION_JSON_UTF8_VALUE))
-               .andExpect(status().isOk())
-               .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
-               .andExpect(jsonPath("$.[0]car.model", is("fiesta")))
-               .andExpect(jsonPath("$.[0]car.brand", is("ford")))
-               .andExpect(jsonPath("$.[0]saleInfo.price", is(1000.0)))
-               .andExpect(jsonPath("$.[0]saleInfo.ownerContacts", is("093")));
+            .contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[0]car.model", is("fiesta")))
+            .andExpect(jsonPath("$.[0]car.brand", is("ford")))
+            .andExpect(jsonPath("$.[0]saleInfo.price", is(1000.0)))
+            .andExpect(jsonPath("$.[0]saleInfo.ownerContacts", is("093")));
     }
 
     @Test
